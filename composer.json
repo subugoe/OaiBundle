@@ -1,0 +1,13 @@
+{
+    "name": "subugoe/oai-bundle",
+    "description": "OAI Service",
+    "type": "library",
+    "license": "AGPL-3.0",
+    "authors": [
+        {
+            "name": "Ingo Pfennigstorf",
+            "email": "i.pfennigstorf@gmail.com"
+        }
+    ],
+    "require": {}
+}
