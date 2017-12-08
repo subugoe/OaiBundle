@@ -545,7 +545,7 @@ class OaiService
             }
         }
 
-        for ($i = 0; $i < min($arrResult['hits'], $arr['maxresults']); ++$i) {
+        for ($i = 0; $i < min($arrResult['hits'], $arr['maxresults'], count($res->getDocuments())); ++$i) {
             /** @var Document $document */
             $document = $res->getDocument($i);
 
@@ -664,7 +664,11 @@ class OaiService
         $results->setFoundCount($solrResults->getNumFound());
 
         foreach ($solrResults->getDocuments() as $solrDocument) {
-            $document = $this->translator->getDocumentById($solrDocument['id']);
+            try {
+                $document = $this->translator->getDocumentById($solrDocument['id']);
+            } catch (\Throwable $t) {
+                continue;
+            }
             $document->addMetadata('date_indexed', $solrDocument['date_indexed']);
             $results->addDocument($document);
         }
