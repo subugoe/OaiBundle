@@ -22,7 +22,7 @@ class Description
      *
      * @return Description
      */
-    public function setOaiIdentifier(OaiIdentifier $oaiIdentifier): Description
+    public function setOaiIdentifier(OaiIdentifier $oaiIdentifier): self
     {
         $this->oaiIdentifier = $oaiIdentifier;
 

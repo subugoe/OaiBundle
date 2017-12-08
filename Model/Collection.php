@@ -49,7 +49,7 @@ class Collection
      *
      * @return Collection
      */
-    public function setLabel(string $label): Collection
+    public function setLabel(string $label): self
     {
         $this->label = $label;
 
@@ -69,7 +69,7 @@ class Collection
      *
      * @return Collection
      */
-    public function setDescription(string $description): Collection
+    public function setDescription(string $description): self
     {
         $this->description = $description;
 
@@ -89,7 +89,7 @@ class Collection
      *
      * @return Collection
      */
-    public function setId(string $id): Collection
+    public function setId(string $id): self
     {
         $this->id = $id;
 
@@ -109,7 +109,7 @@ class Collection
      *
      * @return Collection
      */
-    public function setImage(string $image): Collection
+    public function setImage(string $image): self
     {
         $this->image = $image;
 

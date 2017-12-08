@@ -41,7 +41,7 @@ class Request
      *
      * @return Request
      */
-    public function setUrl(string $url): Request
+    public function setUrl(string $url): self
     {
         $this->url = $url;
 
@@ -61,7 +61,7 @@ class Request
      *
      * @return Request
      */
-    public function setVerb(string $verb): Request
+    public function setVerb(string $verb): self
     {
         $this->verb = $verb;
 
@@ -81,7 +81,7 @@ class Request
      *
      * @return Request
      */
-    public function setIdentifier(string $identifier): Request
+    public function setIdentifier(string $identifier): self
     {
         $this->identifier = $identifier;
 

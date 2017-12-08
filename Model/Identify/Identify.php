@@ -24,7 +24,7 @@ class Identify extends Oai
      *
      * @return Identify
      */
-    public function setIdentify(Identification $identify): Identify
+    public function setIdentify(Identification $identify): self
     {
         $this->identify = $identify;
 

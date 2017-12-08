@@ -26,7 +26,7 @@ class MetadataFormats extends Oai
      *
      * @return MetadataFormats
      */
-    public function setMetadataFormats(array $metadataFormats): MetadataFormats
+    public function setMetadataFormats(array $metadataFormats): self
     {
         $this->metadataFormats = $metadataFormats;
 

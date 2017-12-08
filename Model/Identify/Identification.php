@@ -72,7 +72,7 @@ class Identification
      *
      * @return Identification
      */
-    public function setRepositoryName(string $repositoryName): Identification
+    public function setRepositoryName(string $repositoryName): self
     {
         $this->repositoryName = $repositoryName;
 
@@ -92,7 +92,7 @@ class Identification
      *
      * @return Identification
      */
-    public function setBaseUrl(string $baseUrl): Identification
+    public function setBaseUrl(string $baseUrl): self
     {
         $this->baseUrl = $baseUrl;
 
@@ -112,7 +112,7 @@ class Identification
      *
      * @return Identification
      */
-    public function setProtocolVersion(string $protocolVersion): Identification
+    public function setProtocolVersion(string $protocolVersion): self
     {
         $this->protocolVersion = $protocolVersion;
 
@@ -132,7 +132,7 @@ class Identification
      *
      * @return Identification
      */
-    public function setAdminEmail(string $adminEmail): Identification
+    public function setAdminEmail(string $adminEmail): self
     {
         $this->adminEmail = $adminEmail;
 
@@ -152,7 +152,7 @@ class Identification
      *
      * @return Identification
      */
-    public function setEarliestDatestamp(\DateTimeImmutable $earliestDatestamp): Identification
+    public function setEarliestDatestamp(\DateTimeImmutable $earliestDatestamp): self
     {
         $this->earliestDatestamp = $earliestDatestamp;
 
@@ -172,7 +172,7 @@ class Identification
      *
      * @return Identification
      */
-    public function setDeletedRecord(string $deletedRecord): Identification
+    public function setDeletedRecord(string $deletedRecord): self
     {
         $this->deletedRecord = $deletedRecord;
 
@@ -192,7 +192,7 @@ class Identification
      *
      * @return Identification
      */
-    public function setGranularity(string $granularity): Identification
+    public function setGranularity(string $granularity): self
     {
         $this->granularity = $granularity;
 
@@ -212,7 +212,7 @@ class Identification
      *
      * @return Identification
      */
-    public function setDescription(Description $description): Identification
+    public function setDescription(Description $description): self
     {
         $this->description = $description;
 

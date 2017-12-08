@@ -39,7 +39,7 @@ class MetadataFormat
      *
      * @return MetadataFormat
      */
-    public function setPrefix(string $prefix): MetadataFormat
+    public function setPrefix(string $prefix): self
     {
         $this->prefix = $prefix;
 
@@ -59,7 +59,7 @@ class MetadataFormat
      *
      * @return MetadataFormat
      */
-    public function setSchema(string $schema): MetadataFormat
+    public function setSchema(string $schema): self
     {
         $this->schema = $schema;
 
@@ -79,7 +79,7 @@ class MetadataFormat
      *
      * @return MetadataFormat
      */
-    public function setNamespace(string $namespace): MetadataFormat
+    public function setNamespace(string $namespace): self
     {
         $this->namespace = $namespace;
 

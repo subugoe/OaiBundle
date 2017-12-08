@@ -26,7 +26,7 @@ class Sets extends Oai
      *
      * @return Sets
      */
-    public function setSets(array $sets): Sets
+    public function setSets(array $sets): self
     {
         $this->sets = $sets;
 

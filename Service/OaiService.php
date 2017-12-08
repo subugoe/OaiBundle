@@ -10,6 +10,7 @@ use League\Flysystem\FilesystemInterface;
 use Solarium\Client;
 use Subugoe\IIIFBundle\Model\Document;
 use Subugoe\IIIFBundle\Translator\TranslatorInterface;
+use Subugoe\OaiBundle\Model\Results;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -536,7 +537,7 @@ class OaiService
         }
 
         $res = $this->query($this->oaiConfiguration['query_parameters'][$mPrefix].$addWhere, $this->oaiConfiguration['date_indexed_field'], $direction, $arr);
-        $arrResult['hits'] = count($res);
+        $arrResult['hits'] = $res->getFoundCount();
 
         if (0 === $arrResult['hits']) {
             if ('GetRecord' === $arr['verb']) {
@@ -546,7 +547,7 @@ class OaiService
 
         for ($i = 0; $i < min($arrResult['hits'], $arr['maxresults']); ++$i) {
             /** @var Document $document */
-            $document = $res[$i];
+            $document = $res->getDocument($i);
 
             $arrResult['header'][$i]['identifier'] = $this->oaiConfiguration['oai_identifier']['scheme'].$this->oaiConfiguration['oai_identifier']['delimiter'].$this->oaiConfiguration['oai_identifier']['repositoryIdentifier'].$this->oaiConfiguration['oai_identifier']['delimiter'].$document->getId();
             $arrResult['header'][$i]['datestamp'] = $document->getMetadata()['date_indexed'];
@@ -642,10 +643,10 @@ class OaiService
      *
      * @return array
      */
-    private function query(string $query, string $sort = 'date_indexed', bool $reverse = false, array $configuration = []): array
+    private function query(string $query, string $sort = 'date_indexed', bool $reverse = false, array $configuration = []): Results
     {
-        $rows = isset($configuration['maxresults']) ? $configuration['maxresults'] : 10;
-        $start = isset($configuration['start']) ? $configuration['start'] : 0;
+        $rows = $configuration['maxresults'] ?? 10;
+        $start = $configuration['start'] ?? 0;
         $direction = $reverse ? 'desc' : 'asc';
         $query = $query.' -doctype:fulltext';
 
@@ -657,17 +658,18 @@ class OaiService
             ->setQuery($query);
 
         $solrResults = $this->client
-            ->select($solrQuery)
-            ->getDocuments();
+            ->select($solrQuery);
 
-        $documents = [];
-        foreach ($solrResults as $solrDocument) {
+        $results = new Results();
+        $results->setFoundCount($solrResults->getNumFound());
+
+        foreach ($solrResults->getDocuments() as $solrDocument) {
             $document = $this->translator->getDocumentById($solrDocument['id']);
             $document->addMetadata('date_indexed', $solrDocument['date_indexed']);
-            array_push($documents, $document);
+            $results->addDocument($document);
         }
 
-        return $documents;
+        return $results;
     }
 
     /**

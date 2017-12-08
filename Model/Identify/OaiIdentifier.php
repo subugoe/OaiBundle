@@ -66,7 +66,7 @@ class OaiIdentifier
      *
      * @return OaiIdentifier
      */
-    public function setScheme(string $scheme): OaiIdentifier
+    public function setScheme(string $scheme): self
     {
         $this->scheme = $scheme;
 
@@ -86,7 +86,7 @@ class OaiIdentifier
      *
      * @return OaiIdentifier
      */
-    public function setRepositoryIdentifier(string $repositoryIdentifier): OaiIdentifier
+    public function setRepositoryIdentifier(string $repositoryIdentifier): self
     {
         $this->repositoryIdentifier = $repositoryIdentifier;
 
@@ -106,7 +106,7 @@ class OaiIdentifier
      *
      * @return OaiIdentifier
      */
-    public function setDelimiter(string $delimiter): OaiIdentifier
+    public function setDelimiter(string $delimiter): self
     {
         $this->delimiter = $delimiter;
 
@@ -126,7 +126,7 @@ class OaiIdentifier
      *
      * @return OaiIdentifier
      */
-    public function setSampleIdentifier(string $sampleIdentifier): OaiIdentifier
+    public function setSampleIdentifier(string $sampleIdentifier): self
     {
         $this->sampleIdentifier = $sampleIdentifier;
 
@@ -146,7 +146,7 @@ class OaiIdentifier
      *
      * @return OaiIdentifier
      */
-    public function setNamespace(string $namespace): OaiIdentifier
+    public function setNamespace(string $namespace): self
     {
         $this->namespace = $namespace;
 
@@ -166,7 +166,7 @@ class OaiIdentifier
      *
      * @return OaiIdentifier
      */
-    public function setXsi(string $xsi): OaiIdentifier
+    public function setXsi(string $xsi): self
     {
         $this->xsi = $xsi;
 
@@ -186,7 +186,7 @@ class OaiIdentifier
      *
      * @return OaiIdentifier
      */
-    public function setSchemaLocation(string $schemaLocation): OaiIdentifier
+    public function setSchemaLocation(string $schemaLocation): self
     {
         $this->schemaLocation = $schemaLocation;
 
