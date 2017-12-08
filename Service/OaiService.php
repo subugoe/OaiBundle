@@ -89,6 +89,11 @@ class OaiService
         $this->oaiConfiguration = $config;
     }
 
+    /**
+     * @return string
+     *
+     * @throws OaiException
+     */
     public function start()
     {
         // create XML-DOM
@@ -119,132 +124,10 @@ class OaiService
             $this->errorAllowedArguments($requestArguments['verb'], $requestArguments);
         }
 
-        //#######################################################################################
-        //#### GetRecord ########################################################################
-        //#######################################################################################
         if ('GetRecord' === $requestArguments['verb']) {
-            //error handling
-            $this->errorMetaDataPrefix($requestArguments);
-
-            $result = $this->getRecords($requestArguments);
-
-            if (!$result['hits']) {
-                throw new OaiException('No Records Match', 1478853666);
-            }
-
-            $listRecordsElement = $this->oai->createElement($requestArguments['verb']);
-            $this->oai_pmh->appendChild($listRecordsElement);
-            foreach ($result['header'] as $key => $val) {
-                $this->record = $this->oai->createElement('record');
-                $listRecordsElement->appendChild($this->record);
-                $this->head = $this->oai->createElement('header');
-                $this->record->appendChild($this->head);
-                foreach ($val as $elementName => $elementValue) {
-                    if (is_array($elementValue)) {
-                        foreach ($elementValue as $_v) {
-                            $node = $this->oai->createElement($elementName);
-                            $node->appendChild(new \DOMText($_v));
-                            $this->head->appendChild($node);
-                        }
-                    } else {
-                        $node = $this->oai->createElement($elementName);
-                        $node->appendChild(new \DOMText((string) $elementValue));
-                        $this->head->appendChild($node);
-                    }
-                }
-                $metadataElement = $this->oai->createElement('metadata');
-                $this->record->appendChild($metadataElement);
-                switch ($requestArguments['metadataPrefix']) {
-                    case 'oai_dc':
-                        $this->oai_dc = $this->oai->createElement('oai_dc:dc');
-                        foreach ($this->oaiConfiguration['metadata_format_options']['oai_dc']['dc'] as $attribute => $value) {
-                            $this->oai_dc->setAttribute($attribute, $value);
-                        }
-                        $metadataElement->appendChild($this->oai_dc);
-
-                        foreach ($result['metadata'][$key] as $elementName => $elementValue) {
-                            if ($elementValue) {
-                                foreach ($elementValue as $_v) {
-                                    if ($_v) {
-                                        if (is_array($_v)) {
-                                            $_v = implode(' ', $_v);
-                                        }
-                                        if ('dc:description' === $elementName) {
-                                            $data = $this->oai->createCDATASection($_v);
-                                        } else {
-                                            $data = new \DOMText((string) $_v);
-                                        }
-                                        $node = $this->oai->createElement($elementName);
-                                        $node->appendChild($data);
-                                        $this->oai_dc->appendChild($node);
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    case 'mets':
-                        foreach ($result['metadata'][$key] as $elementName => $elementValue) {
-                            $tmp = new \DOMDocument();
-                            $test = $tmp->loadXML($elementValue);
-                            if ($test) {
-                                $mets = $tmp->getElementsByTagName('mets')->item(0);
-                                $import = $this->oai->importNode($mets, true);
-                                $metadataElement->appendChild($import);
-                            }
-                        }
-                        break;
-                }
-            }
-
-            //getRecord
-        }
-        //#######################################################################################
-        //#### END GetRecord ####################################################################
-        //#######################################################################################
-        //#######################################################################################
-        //#### ListRecords / LstIdentifiers #####################################################
-        //#######################################################################################
-        if ('ListRecords' === $requestArguments['verb'] || 'ListIdentifiers' === $requestArguments['verb']) {
-            //error handling
-            $this->errorDate($requestArguments);
-            $this->errorMetaDataPrefix($requestArguments);
-            $this->errorFromUntil($requestArguments);
-            $result = $this->getRecords($requestArguments);
-            if (0 === count($result)) {
-                throw new OaiException('No Records Match', 1478853689);
-            }
-
-            $listRecordsElement = $this->oai->createElement($requestArguments['verb']);
-            $this->oai_pmh->appendChild($listRecordsElement);
-            foreach ($result['header'] as $key => $val) {
-                if ('ListRecords' === $requestArguments['verb']) {
-                    $this->record = $this->oai->createElement('record');
-                    $listRecordsElement->appendChild($this->record);
-                    $this->head = $this->oai->createElement('header');
-                    $this->record->appendChild($this->head);
-                } else {
-                    $this->head = $this->oai->createElement('header');
-                    $listRecordsElement->appendChild($this->head);
-                }
-                foreach ($val as $elementName => $elementValue) {
-                    if (is_array($elementValue)) {
-                        foreach ($elementValue as $_v) {
-                            $node = $this->oai->createElement($elementName);
-                            $node->appendChild(new \DOMText($_v));
-                            $this->head->appendChild($node);
-                        }
-                    } else {
-                        $node = $this->oai->createElement($elementName);
-                        $node->appendChild(new \DOMText((string) $elementValue));
-                        $this->head->appendChild($node);
-                    }
-                }
-                if ('ListRecords' === $requestArguments['verb']) {
-                    $this->listRecords($requestArguments, $result, $key);
-                }
-            }
-
-            $listRecordsElement->appendChild($this->getResumptionToken($result, $requestArguments));
+            $this->getRecord($requestArguments);
+        } elseif ('ListRecords' === $requestArguments['verb'] || 'ListIdentifiers' === $requestArguments['verb']) {
+            $this->getListRecordsAndListIdentifiers($requestArguments);
         }
 
         return $this->oai->saveXML();
@@ -306,6 +189,11 @@ class OaiService
         }
     }
 
+    /**
+     * @param array $requestArguments
+     *
+     * @throws OaiException
+     */
     private function errorMetaDataPrefix(array &$requestArguments)
     {
         if (isset($requestArguments['metadataPrefix'])) {
@@ -322,6 +210,7 @@ class OaiService
      *
      * @return array
      *
+     * @throws FileNotFoundException
      * @throws OaiException
      */
     private function parseArguments(array $requestArguments): array
@@ -426,6 +315,14 @@ class OaiService
         }
     }
 
+    /**
+     * @param string $verb
+     * @param array  $requestArguments
+     *
+     * @return bool
+     *
+     * @throws OaiException
+     */
     private function errorRequiredArguments(string $verb, array $requestArguments): bool
     {
         $requiredArguments = explode(',', $this->oaiConfiguration['verbs'][$verb]['requiredArguments']);
@@ -454,6 +351,7 @@ class OaiService
      * @return bool
      *
      * @throws OaiException
+     * @throws FileNotFoundException
      */
     private function restoreArgs(array &$requestArguments): bool
     {
@@ -748,5 +646,138 @@ class OaiService
                 $metadata->appendChild($import);
             }
         }
+    }
+
+    /**
+     * @param $requestArguments
+     *
+     * @throws OaiException
+     */
+    private function getListRecordsAndListIdentifiers($requestArguments)
+    {
+        //error handling
+        $this->errorDate($requestArguments);
+        $this->errorMetaDataPrefix($requestArguments);
+        $this->errorFromUntil($requestArguments);
+        $result = $this->getRecords($requestArguments);
+        if (0 === count($result)) {
+            throw new OaiException('No matching records', 1478853689);
+        }
+
+        $listRecordsElement = $this->oai->createElement($requestArguments['verb']);
+        $this->oai_pmh->appendChild($listRecordsElement);
+        foreach ($result['header'] as $key => $val) {
+            if ('ListRecords' === $requestArguments['verb']) {
+                $this->record = $this->oai->createElement('record');
+                $listRecordsElement->appendChild($this->record);
+                $this->head = $this->oai->createElement('header');
+                $this->record->appendChild($this->head);
+            } else {
+                $this->head = $this->oai->createElement('header');
+                $listRecordsElement->appendChild($this->head);
+            }
+            foreach ($val as $elementName => $elementValue) {
+                if (is_array($elementValue)) {
+                    foreach ($elementValue as $_v) {
+                        $node = $this->oai->createElement($elementName);
+                        $node->appendChild(new \DOMText($_v));
+                        $this->head->appendChild($node);
+                    }
+                } else {
+                    $node = $this->oai->createElement($elementName);
+                    $node->appendChild(new \DOMText((string) $elementValue));
+                    $this->head->appendChild($node);
+                }
+            }
+            if ('ListRecords' === $requestArguments['verb']) {
+                $this->listRecords($requestArguments, $result, $key);
+            }
+        }
+
+        $listRecordsElement->appendChild($this->getResumptionToken($result, $requestArguments));
+    }
+
+    /**
+     * @param $requestArguments
+     *
+     * @return mixed
+     *
+     * @throws OaiException
+     */
+    private function getRecord($requestArguments)
+    {
+        $this->errorMetaDataPrefix($requestArguments);
+
+        $result = $this->getRecords($requestArguments);
+
+        if (!$result['hits']) {
+            throw new OaiException('No Records Match', 1478853666);
+        }
+
+        $listRecordsElement = $this->oai->createElement($requestArguments['verb']);
+        $this->oai_pmh->appendChild($listRecordsElement);
+        foreach ($result['header'] as $key => $val) {
+            $this->record = $this->oai->createElement('record');
+            $listRecordsElement->appendChild($this->record);
+            $this->head = $this->oai->createElement('header');
+            $this->record->appendChild($this->head);
+            foreach ($val as $elementName => $elementValue) {
+                if (is_array($elementValue)) {
+                    foreach ($elementValue as $_v) {
+                        $node = $this->oai->createElement($elementName);
+                        $node->appendChild(new \DOMText($_v));
+                        $this->head->appendChild($node);
+                    }
+                } else {
+                    $node = $this->oai->createElement($elementName);
+                    $node->appendChild(new \DOMText((string) $elementValue));
+                    $this->head->appendChild($node);
+                }
+            }
+            $metadataElement = $this->oai->createElement('metadata');
+            $this->record->appendChild($metadataElement);
+            switch ($requestArguments['metadataPrefix']) {
+                case 'oai_dc':
+                    $this->oai_dc = $this->oai->createElement('oai_dc:dc');
+                    foreach ($this->oaiConfiguration['metadata_format_options']['oai_dc']['dc'] as $attribute => $value) {
+                        $this->oai_dc->setAttribute($attribute, $value);
+                    }
+                    $metadataElement->appendChild($this->oai_dc);
+
+                    foreach ($result['metadata'][$key] as $elementName => $elementValue) {
+                        if ($elementValue) {
+                            foreach ($elementValue as $_v) {
+                                if ($_v) {
+                                    if (is_array($_v)) {
+                                        $_v = implode(' ', $_v);
+                                    }
+                                    if ('dc:description' === $elementName) {
+                                        $data = $this->oai->createCDATASection($_v);
+                                    } else {
+                                        $data = new \DOMText((string) $_v);
+                                    }
+                                    $node = $this->oai->createElement($elementName);
+                                    $node->appendChild($data);
+                                    $this->oai_dc->appendChild($node);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 'mets':
+                    foreach ($result['metadata'][$key] as $elementName => $elementValue) {
+                        $tmp = new \DOMDocument();
+                        $test = $tmp->loadXML($elementValue);
+                        if ($test) {
+                            $mets = $tmp->getElementsByTagName('mets')->item(0);
+                            $import = $this->oai->importNode($mets, true);
+                            $metadataElement->appendChild($import);
+                        }
+                    }
+                    break;
+            }
+        }
+
+        return $requestArguments;
     }
 }
