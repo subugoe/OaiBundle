@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Subugoe\OaiBundle\Controller;
 
+use JMS\Serializer\SerializerInterface;
 use Subugoe\OaiBundle\Model\Collection;
 use Subugoe\OaiBundle\Model\Identify\Description;
 use Subugoe\OaiBundle\Model\Identify\Identification;
@@ -13,12 +14,36 @@ use Subugoe\OaiBundle\Model\MetadataFormat;
 use Subugoe\OaiBundle\Model\MetadataFormats;
 use Subugoe\OaiBundle\Model\Sets;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Subugoe\OaiBundle\Service\OaiService;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Translation\TranslatorInterface;
 
 class OaiController extends Controller
 {
+    /**
+     * @var SerializerInterface
+     */
+    private $serializer;
+
+    /**
+     * @var OaiService
+     */
+    private $oaiService;
+
+    /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    public function __construct(SerializerInterface $serializer, OaiService $oaiService, TranslatorInterface $translator)
+    {
+        $this->serializer = $serializer;
+        $this->oaiService = $oaiService;
+        $this->translator = $translator;
+    }
+
     /**
      * @Route("/oai2/")
      */
@@ -35,7 +60,7 @@ class OaiController extends Controller
         }
 
         $response = new Response();
-        $response->setContent($this->get('oai_service')->start());
+        $response->setContent($this->oaiService->start());
         $response->headers->add(['Content-Type' => 'application/xml']);
         $response->setStatusCode(Response::HTTP_OK);
 
@@ -85,7 +110,7 @@ class OaiController extends Controller
         $identify->setIdentify($identification);
 
         $response = new Response();
-        $response->setContent($this->get('jms_serializer')->serialize($identify, 'xml'));
+        $response->setContent($this->serializer->serialize($identify, 'xml'));
         $response->headers->add(['Content-Type' => 'application/xml']);
 
         return $response;
@@ -128,7 +153,7 @@ class OaiController extends Controller
         $metadataFormats->setMetadataFormats($formats);
 
         $response = new Response();
-        $response->setContent($this->get('jms_serializer')->serialize($metadataFormats, 'xml'));
+        $response->setContent($this->serializer->serialize($metadataFormats, 'xml'));
         $response->headers->add(['Content-Type' => 'application/xml']);
 
         return $response;
@@ -153,13 +178,13 @@ class OaiController extends Controller
             $collectionItem = new Collection();
             $collectionItem
                 ->setId(sprintf('dc_%s', $collection['id']))
-                ->setLabel($this->get('translator')->trans($collection['id']));
+                ->setLabel($this->translator->trans($collection['id']));
             $collectionStorage[] = $collectionItem;
         }
         $sets->setSets($collectionStorage);
 
         $response = new Response();
-        $response->setContent($this->get('jms_serializer')->serialize($sets, 'xml'));
+        $response->setContent($this->serializer->serialize($sets, 'xml'));
         $response->headers->add(['Content-Type' => 'application/xml']);
 
         return $response;

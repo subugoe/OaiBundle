@@ -158,7 +158,7 @@ class OaiService
         foreach ($arrDates as $key => $val) {
             if (isset($requestArguments[$key])) {
                 preg_match('/([0-9]{4})-([0-9]{2})-([0-9]{2})(([T]{1})([0-9]{2}):([0-9]{2}):([0-9]{2})([Z]{1}){1})?/', $requestArguments[$key], $regs);
-                if ('' !== $regs[1] && '' !== $regs[4]) {
+                if ('' !== $regs[1] && isset($regs[4]) && '' !== $regs[4]) {
                     $requestArguments['DB'.$key] = $regs[1].'-'.$regs[2].'-'.$regs[3].' '.$regs[6].':'.$regs[7].':'.$regs[8];
                 } else {
                     if ('' !== $regs[1] && 10 === strlen($requestArguments[$key])) {
@@ -399,19 +399,19 @@ class OaiService
             $addWhere = '';
             if (isset($arr['from']) || isset($arr['until'])) {
                 if (!isset($arr['from'])) {
-                    $from = '1970-01-01T00:00:00Z';
+                    $from = new \DateTime('1970-01-01T00:00:00Z');
                     $direction = true;
                 } else {
-                    $from = $arr['from'];
+                    $from = new \DateTime($arr['from']);
                     $direction = false;
                 }
                 if (!isset($arr['until'])) {
-                    $until = '9999-12-31T00:00:00Z';
+                    $until = new \DateTime('9999-12-31T00:00:00Z');
                 } else {
-                    $until = $arr['until'];
+                    $until = new \DateTime($arr['until']);
                     $direction = false;
                 }
-                $addWhere .= ' (date_indexed:['.$from.' TO '.$until.'])';
+                $addWhere .= ' (date_indexed:['.$from->format('Y-m-d\TH:i:s\Z').' TO '.$until->format('Y-m-d\TH:i:s\Z').'])';
             }
             if (isset($arr['set'])) {
                 $arrTmp = explode('_', trim($arr['set']));

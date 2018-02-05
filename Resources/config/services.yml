@@ -3,3 +3,7 @@ services:
     class: Subugoe\OaiBundle\Service\OaiService
     arguments: ["@request_stack", "@solarium.client", "@oaitemp_filesystem", "@subugoe_iiif.translator", "%subugoe_oai%"]
     public: true
+
+  Subugoe\OaiBundle\Controller\OaiController:
+    autoconfigure: true
+    autowire: true
