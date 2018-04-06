@@ -9,12 +9,12 @@ class Results
     /**
      * @var int
      */
-    private $foundCount;
+    private $foundCount = 0;
 
     /**
      * @var array
      */
-    private $documents;
+    private $documents = [];
 
     /**
      * @return int
