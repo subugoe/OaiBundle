@@ -505,7 +505,8 @@ class OaiService
                         }
                         break;
                     case 'mets':
-                        $arrResult['metadata'][$i]['mets:mets'] = file_get_contents('http://gdz.sub.uni-goettingen.de/mets_export.php?PPN='.$document->getId());
+                        $filename = sprintf('https://gdz.sub.uni-goettingen.de/mets/%s.mets.xml', $document->getId());
+                        $arrResult['metadata'][$i]['mets:mets'] = file_get_contents($filename);
                         break;
                 }
             }
