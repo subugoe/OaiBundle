@@ -605,7 +605,7 @@ class OaiService
         $responseDate = $this->oai->createElement('responseDate', gmdate('Y-m-d\TH:i:s\Z', time()));
         $this->oai_pmh->appendChild($responseDate);
 
-        $this->request = $this->oai->createElement('request', 'http://gdz.sub.uni-goettingen.de/oai2/');
+        $this->request = $this->oai->createElement('request', 'https://gdz.sub.uni-goettingen.de/oai2/');
     }
 
     private function listOaiDcRecords(array $result, $key, \DOMElement $metadata)
