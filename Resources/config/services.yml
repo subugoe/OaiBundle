@@ -4,8 +4,22 @@ services:
 
   Subugoe\OaiBundle\Service\OaiServiceInterface:
     class: Subugoe\OaiBundle\Service\OaiService
-    arguments: ["@request_stack", "@solarium.client", "@oaitemp_filesystem", "@subugoe_iiif.translator", "%subugoe_oai%"]
-    public: true
+    autoconfigure: true
+    autowire: true
+    calls:
+      - method: setRequestStack
+        arguments:
+          - '@request_stack'
+      - method: setClient
+        arguments:
+          - '@solarium.client'
+      - method: setFilesystem
+        arguments:
+          - '@oaitemp_filesystem'
+      - method: setOaiConfiguration
+        arguments:
+          - '%subugoe_oai%'
+
 
   Subugoe\OaiBundle\Controller\OaiController:
     autoconfigure: true

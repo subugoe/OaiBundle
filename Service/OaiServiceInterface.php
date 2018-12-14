@@ -3,6 +3,9 @@
 namespace Subugoe\OaiBundle\Service;
 
 use Subugoe\OaiBundle\Exception\OaiException;
+use Subugoe\OaiBundle\Model\Identify\Identify;
+use Subugoe\OaiBundle\Model\MetadataFormats;
+use Subugoe\OaiBundle\Model\Sets;
 
 interface OaiServiceInterface
 {
@@ -12,4 +15,10 @@ interface OaiServiceInterface
     public function start(): string;
 
     public function deleteExpiredResumptionTokens();
+
+    public function getIdentify(string $url, array $oaiConfiguration): Identify;
+
+    public function getMetadataFormats(string $url, array $oaiConfiguration, ?string $identifier): MetadataFormats;
+
+    public function getListSets(string $url, array $oaiConfiguration): Sets;
 }

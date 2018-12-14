@@ -4,13 +4,22 @@ declare(strict_types=1);
 
 namespace Subugoe\OaiBundle\Service;
 
+use League\Flysystem\Filesystem;
 use Subugoe\OaiBundle\Exception\OaiException;
 use League\Flysystem\FileNotFoundException;
 use League\Flysystem\FilesystemInterface;
 use Solarium\Client;
 use Subugoe\IIIFBundle\Model\Document;
 use Subugoe\IIIFBundle\Translator\TranslatorInterface;
+use Subugoe\OaiBundle\Model\Collection;
+use Subugoe\OaiBundle\Model\Identify\Description;
+use Subugoe\OaiBundle\Model\Identify\Identification;
+use Subugoe\OaiBundle\Model\Identify\Identify;
+use Subugoe\OaiBundle\Model\Identify\OaiIdentifier;
+use Subugoe\OaiBundle\Model\MetadataFormat;
+use Subugoe\OaiBundle\Model\MetadataFormats;
 use Subugoe\OaiBundle\Model\Results;
+use Subugoe\OaiBundle\Model\Sets;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -72,21 +81,138 @@ class OaiService implements OaiServiceInterface
     private $oaiConfiguration;
 
     /**
-     * OaiService constructor.
-     *
-     * @param RequestStack        $requestStack
-     * @param Client              $client
-     * @param FilesystemInterface $oaiTempDirectory
-     * @param TranslatorInterface $translator
-     * @param array               $config
+     * @var \Symfony\Contracts\Translation\TranslatorInterface
      */
-    public function __construct(RequestStack $requestStack, Client $client, FilesystemInterface $oaiTempDirectory, TranslatorInterface $translator, array $config)
+    private $translation;
+
+    /**
+     * OaiService constructor.
+     */
+    public function __construct(
+        TranslatorInterface $translator,
+        \Symfony\Contracts\Translation\TranslatorInterface $translation
+    ) {
+        $this->translator = $translator;
+        $this->translation = $translation;
+    }
+
+    public function setRequestStack(RequestStack $requestStack)
     {
         $this->requestStack = $requestStack;
-        $this->client = $client;
-        $this->oaiTempDirectory = $oaiTempDirectory;
-        $this->translator = $translator;
+    }
+
+    public function setFilesystem(Filesystem $filesystem)
+    {
+        $this->oaiTempDirectory = $filesystem;
+    }
+
+    public function setOaiConfiguration(array $config)
+    {
         $this->oaiConfiguration = $config;
+    }
+
+    public function setClient(Client $client)
+    {
+        $this->client = $client;
+    }
+
+    public function getIdentify(string $url, array $oaiConfiguraion): Identify
+    {
+        $identify = new Identify();
+        $identification = new Identification();
+        $description = new Description();
+        $oaiIdentifier = new OaiIdentifier();
+        $oaiIdentifierTags = $oaiConfiguraion['oai_identifier'];
+
+        $oaiIdentifier
+            ->setNamespace($oaiIdentifierTags['xmlns'])
+            ->setXsi($oaiIdentifierTags['xmlns_xsi'])
+            ->setSchemaLocation($oaiIdentifierTags['xsi_schema_location'])
+            ->setScheme($oaiIdentifierTags['scheme'])
+            ->setDelimiter($oaiIdentifierTags['delimiter'])
+            ->setRepositoryIdentifier($oaiIdentifierTags['repository_identifier'])
+            ->setSampleIdentifier($oaiIdentifierTags['sample_identifier']);
+
+        $description->setOaiIdentifier($oaiIdentifier);
+        $identificationTags = $oaiConfiguraion['identification_tags'];
+        $oaiRequest = (new \Subugoe\OaiBundle\Model\Request())
+            ->setUrl($url)
+            ->setVerb('Identify');
+        $identify
+            ->setDate(new \DateTimeImmutable())
+            ->setRequest($oaiRequest);
+        $identification
+            ->setAdminEmail($identificationTags['admin_email'])
+            ->setBaseUrl($identificationTags['base_url'])
+            ->setDeletedRecord($identificationTags['deleted_record'])
+            ->setGranularity($identificationTags['granularity'])
+            ->setProtocolVersion($identificationTags['protocol_version'])
+            ->setRepositoryName($identificationTags['repository_name'])
+            ->setEarliestDatestamp(new \DateTimeImmutable('1998-03-01T00:00:00Z'))
+            ->setDescription($description);
+
+        $identify->setIdentify($identification);
+
+        return $identify;
+    }
+
+    public function getMetadataFormats(string $url, array $oaiConfiguraion, ?string $identifer): MetadataFormats
+    {
+        $metadataFormats = new MetadataFormats();
+        $oaiRequest = (new \Subugoe\OaiBundle\Model\Request())
+            ->setUrl($url)
+            ->setVerb('ListMetadataFormats');
+
+        if ($identifer) {
+            $oaiRequest->setIdentifier($identifer);
+        }
+        $metadataFormats->setDate(new \DateTimeImmutable())
+            ->setRequest($oaiRequest);
+
+        $formats = [];
+        $availableFormats = $oaiConfiguraion['metadata_formats'];
+        foreach ($availableFormats as $availableFormat) {
+            $metadataFormat = new MetadataFormat();
+            $namespace = $availableFormat['namespace'];
+            $schema = $availableFormat['schema'];
+            if (is_array($namespace)) {
+                $namespace = implode(' ', $availableFormat['namespace']);
+                $schema = implode(' ', $schema);
+            }
+
+            $metadataFormat
+                ->setPrefix($availableFormat['prefix'])
+                ->setSchema($schema)
+                ->setNamespace($namespace);
+            $formats[] = $metadataFormat;
+        }
+
+        $metadataFormats->setMetadataFormats($formats);
+
+        return $metadataFormats;
+    }
+
+    public function getListSets(string $url, array $collections): Sets
+    {
+        $sets = new Sets();
+        $oaiRequest = (new \Subugoe\OaiBundle\Model\Request())
+            ->setUrl($url)
+            ->setVerb('ListSets');
+
+        $sets->setDate(new \DateTimeImmutable())
+            ->setRequest($oaiRequest);
+
+        $collectionStorage = [];
+        foreach ($collections as $collection) {
+            $collectionItem = new Collection();
+            $collectionItem
+                ->setId(sprintf('dc_%s', $collection['id']))
+                ->setLabel($this->translation->trans($collection['id']));
+            $collectionStorage[] = $collectionItem;
+        }
+        $sets->setSets($collectionStorage);
+
+        return $sets;
     }
 
     public function start(): string
