@@ -1,8 +1,8 @@
 services:
   Subugoe\OaiBundle\Service\OaiService:
-    alias: 'oai_service'
+    alias: Subugoe\OaiBundle\Service\OaiServiceInterface
 
-  oai_service:
+  Subugoe\OaiBundle\Service\OaiServiceInterface:
     class: Subugoe\OaiBundle\Service\OaiService
     arguments: ["@request_stack", "@solarium.client", "@oaitemp_filesystem", "@subugoe_iiif.translator", "%subugoe_oai%"]
     public: true

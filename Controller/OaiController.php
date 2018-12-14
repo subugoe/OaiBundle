@@ -13,14 +13,14 @@ use Subugoe\OaiBundle\Model\Identify\OaiIdentifier;
 use Subugoe\OaiBundle\Model\MetadataFormat;
 use Subugoe\OaiBundle\Model\MetadataFormats;
 use Subugoe\OaiBundle\Model\Sets;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Subugoe\OaiBundle\Service\OaiService;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Subugoe\OaiBundle\Service\OaiServiceInterface;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-class OaiController extends Controller
+class OaiController extends AbstractController
 {
     /**
      * @var SerializerInterface
@@ -28,7 +28,7 @@ class OaiController extends Controller
     private $serializer;
 
     /**
-     * @var OaiService
+     * @var OaiServiceInterface
      */
     private $oaiService;
 
@@ -37,7 +37,7 @@ class OaiController extends Controller
      */
     private $translator;
 
-    public function __construct(SerializerInterface $serializer, OaiService $oaiService, TranslatorInterface $translator)
+    public function __construct(SerializerInterface $serializer, OaiServiceInterface $oaiService, TranslatorInterface $translator)
     {
         $this->serializer = $serializer;
         $this->oaiService = $oaiService;
@@ -64,7 +64,7 @@ class OaiController extends Controller
         $response->headers->add(['Content-Type' => 'application/xml']);
         $response->setStatusCode(Response::HTTP_OK);
 
-        $this->deleteExpiredResumptionTokens();
+        $this->oaiService->deleteExpiredResumptionTokens();
 
         return $response;
     }
@@ -188,17 +188,5 @@ class OaiController extends Controller
         $response->headers->add(['Content-Type' => 'application/xml']);
 
         return $response;
-    }
-
-    private function deleteExpiredResumptionTokens()
-    {
-        $time = time() - 259200;
-        $filesystem = $this->get('oaitemp_filesystem');
-        $contents = $filesystem->listContents('/oai-gdz/');
-        foreach ($contents as $object) {
-            if ($object['timestamp'] < $time) {
-                $filesystem->delete($object['path']);
-            }
-        }
     }
 }

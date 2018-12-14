@@ -14,7 +14,7 @@ use Subugoe\OaiBundle\Model\Results;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class OaiService
+class OaiService implements OaiServiceInterface
 {
     /**
      * @var \DOMDocument
@@ -89,12 +89,7 @@ class OaiService
         $this->oaiConfiguration = $config;
     }
 
-    /**
-     * @return string
-     *
-     * @throws OaiException
-     */
-    public function start()
+    public function start(): string
     {
         // create XML-DOM
         $this->oai = new \DOMDocument('1.0', 'UTF-8');
@@ -131,6 +126,17 @@ class OaiService
         }
 
         return $this->oai->saveXML();
+    }
+
+    public function deleteExpiredResumptionTokens()
+    {
+        $time = time() - 259200;
+        $contents = $this->oaiTempDirectory->listContents('/oai-gdz/');
+        foreach ($contents as $object) {
+            if ($object['timestamp'] < $time) {
+                $this->oaiTempDirectory->delete($object['path']);
+            }
+        }
     }
 
     protected function listRecords(array $requestArguments, array $result, $key)

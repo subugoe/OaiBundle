@@ -11,5 +11,9 @@
     ],
     "autoload": {
        "psr-4": { "Subugoe\\OaiBundle\\": "" }
+    },
+    "require": {
+        "php": "^7.0",
+        "symfony/framework-bundle": "^4.0"
     }
 }
