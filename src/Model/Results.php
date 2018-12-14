@@ -2,7 +2,7 @@
 
 namespace Subugoe\OaiBundle\Model;
 
-use Subugoe\IIIFBundle\Model\Document;
+use Subugoe\IIIFBundle\Model\DocumentInterface;
 
 class Results
 {
@@ -56,12 +56,12 @@ class Results
         return $this;
     }
 
-    public function addDocument(Document $document)
+    public function addDocument(DocumentInterface $document)
     {
         $this->documents[] = $document;
     }
 
-    public function getDocument(int $position): Document
+    public function getDocument(int $position): DocumentInterface
     {
         return $this->documents[$position];
     }

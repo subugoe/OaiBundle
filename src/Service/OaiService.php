@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Subugoe\OaiBundle\Service;
 
 use League\Flysystem\Filesystem;
+use Psr\Log\LoggerInterface;
 use Subugoe\OaiBundle\Exception\OaiException;
 use League\Flysystem\FileNotFoundException;
 use League\Flysystem\FilesystemInterface;
@@ -12,10 +13,12 @@ use Solarium\Client;
 use Subugoe\IIIFBundle\Model\Document;
 use Subugoe\IIIFBundle\Translator\TranslatorInterface;
 use Subugoe\OaiBundle\Model\Collection;
+use Subugoe\OaiBundle\Model\Element;
 use Subugoe\OaiBundle\Model\Identify\Description;
 use Subugoe\OaiBundle\Model\Identify\Identification;
 use Subugoe\OaiBundle\Model\Identify\Identify;
 use Subugoe\OaiBundle\Model\Identify\OaiIdentifier;
+use Subugoe\OaiBundle\Model\Metadata;
 use Subugoe\OaiBundle\Model\MetadataFormat;
 use Subugoe\OaiBundle\Model\MetadataFormats;
 use Subugoe\OaiBundle\Model\Results;
@@ -26,27 +29,27 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class OaiService implements OaiServiceInterface
 {
     /**
-     * @var \DOMDocument
+     * @var Element
      */
     public $oai;
 
     /**
-     * @var \DOMElement
+     * @var Element\OaiPmh
      */
     private $oai_pmh;
 
     /**
-     * @var \DOMElement
+     * @var Element\Request
      */
     private $request;
 
     /**
-     * @var \DOMElement
+     * @var Element\Record
      */
     private $record;
 
     /**
-     * @var \DOMElement
+     * @var Element\Header
      */
     private $head;
 
@@ -86,14 +89,17 @@ class OaiService implements OaiServiceInterface
     private $translation;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * OaiService constructor.
      */
-    public function __construct(
-        TranslatorInterface $translator,
-        \Symfony\Contracts\Translation\TranslatorInterface $translation
-    ) {
+    public function __construct(TranslatorInterface $translator, \Symfony\Contracts\Translation\TranslatorInterface $translation, LoggerInterface $logger) {
         $this->translator = $translator;
         $this->translation = $translation;
+        $this->logger = $logger;
     }
 
     public function setRequestStack(RequestStack $requestStack)
@@ -215,16 +221,9 @@ class OaiService implements OaiServiceInterface
         return $sets;
     }
 
-    public function start(): string
+    public function start(): Element
     {
-        // create XML-DOM
-        $this->oai = new \DOMDocument('1.0', 'UTF-8');
-
-        //nice output format (linebreaks and tabs)
-        $this->oai->formatOutput = false;
-
-        //insert xsl
-        $this->oai->appendChild($this->oai->createProcessingInstruction('xml-stylesheet', 'href="/xsl/oai2.xsl" type="text/xsl"'));
+        $this->oai = new Element();
 
         $this->createRootElement();
 
@@ -251,7 +250,7 @@ class OaiService implements OaiServiceInterface
             $this->getListRecordsAndListIdentifiers($requestArguments);
         }
 
-        return $this->oai->saveXML();
+        return $this->oai;
     }
 
     public function deleteExpiredResumptionTokens()
@@ -260,15 +259,19 @@ class OaiService implements OaiServiceInterface
         $contents = $this->oaiTempDirectory->listContents('/oai-gdz/');
         foreach ($contents as $object) {
             if ($object['timestamp'] < $time) {
+                try {
                 $this->oaiTempDirectory->delete($object['path']);
+                } catch (FileNotFoundException $fileNotFoundException) {
+                    $this->logger->error($fileNotFoundException->getMessage(), $fileNotFoundException->getTrace());
+                }
             }
         }
     }
 
-    protected function listRecords(array $requestArguments, array $result, $key)
+    private function listRecords(array $requestArguments, array $result, $key)
     {
-        $metadata = $this->oai->createElement('metadata');
-        $this->record->appendChild($metadata);
+        $metadata = new Metadata();
+        $this->record->setMetadata($metadata);
         switch ($requestArguments['metadataPrefix']) {
             case 'oai_dc':
                 $this->listOaiDcRecords($result, $key, $metadata);
@@ -326,14 +329,14 @@ class OaiService implements OaiServiceInterface
      *
      * @throws OaiException
      */
-    private function errorMetaDataPrefix(array &$requestArguments)
+    private function errorMetaDataPrefix(array $requestArguments)
     {
         if (isset($requestArguments['metadataPrefix'])) {
             if (!array_key_exists($requestArguments['metadataPrefix'], $this->oaiConfiguration['metadata_formats'])) {
-                throw new OaiException(sprintf('Bad argument. metadataPrefix %s', $requestArguments['metadataPrefix']), 1478852962);
+                throw new OaiException(sprintf('Bad argument. metadataPrefix %s. Allowed values are: %s', $requestArguments['metadataPrefix'], implode(', ', $this->oaiConfiguration['metadata_formats'])), 1478852962);
             }
         } else {
-            throw new OaiException(sprintf('Bad argument. metadataPrefix %s', ''), 1478853001);
+            throw new OaiException(sprintf('Bad argument. metadataPrefix %s. Allowed values are: %s', '', implode(', ', $this->oaiConfiguration['metadata_formats'])), 1478853001);
         }
     }
 
@@ -366,14 +369,14 @@ class OaiService implements OaiServiceInterface
                     if ('verb' === $key && !array_key_exists($val, $this->oaiConfiguration['verbs'])) {
                         continue;
                     }
-                    $this->request->setAttribute($key, $val);
+                    $this->request->addAttribute($key, $val);
                 }
                 if (array_key_exists($val, $this->oaiConfiguration['verbs'])) {
-                    $this->request->setAttribute($key, $val);
+                    $this->request->addAttribute($key, $val);
                 }
             }
         }
-        $this->oai_pmh->appendChild($this->request);
+        $this->oai_pmh->setRequest($this->request);
 
         //same argument
         if ($this->requestStack->getMasterRequest()->isMethod(Request::METHOD_GET)) {
@@ -423,7 +426,7 @@ class OaiService implements OaiServiceInterface
         }
         if (isset($requestArguments['verb'])) {
             if (!array_key_exists($requestArguments['verb'], $this->oaiConfiguration['verbs'])) {
-                throw new OaiException(sprintf('Bad verb %s: $s', $requestArguments['verb'], ''), 1478853608);
+                throw new OaiException(sprintf('Bad verb %s: %s', $requestArguments['verb'], ''), 1478853608);
             }
 
             return $requestArguments;
@@ -480,24 +483,20 @@ class OaiService implements OaiServiceInterface
     /**
      * @param array $requestArguments
      *
-     * @return bool
-     *
      * @throws OaiException
      * @throws FileNotFoundException
      */
-    private function restoreArgs(array &$requestArguments): bool
+    private function restoreArgs(array &$requestArguments)
     {
-        $strToken = $this->oaiTempDirectory->read('/oai-gdz/'.$requestArguments['resumptionToken']);
-
         try {
-            parse_str($strToken, $arrToken);
-            $requestArguments = array_merge($requestArguments, $arrToken);
-            unset($requestArguments['resumptionToken']);
+            $strToken = $this->oaiTempDirectory->read('/oai-gdz/' . $requestArguments['resumptionToken']);
         } catch (FileNotFoundException $e) {
             throw new OaiException(sprintf('Bad Resumption Token %s.', $requestArguments['resumptionToken']), 1478853790);
         }
 
-        return true;
+        parse_str($strToken, $arrToken);
+        $requestArguments = array_merge($requestArguments, $arrToken);
+        unset($requestArguments['resumptionToken']);
     }
 
     /**
@@ -707,40 +706,39 @@ class OaiService implements OaiServiceInterface
         return $results;
     }
 
-    /**
-     * @param array $result
-     * @param array $requestArguments
-     *
-     * @return \DOMElement
-     */
-    private function getResumptionToken(array $result, array $requestArguments): \DOMElement
+    private function getResumptionToken(array $result, array $requestArguments): Element\ResumptionToken
     {
         $token = isset($result['token']) ? $result['token'] : '';
 
-        $resumptionToken = $this->oai->createElement('resumptionToken', $token);
-        $resumptionToken->setAttribute('expirationDate', (gmdate('Y-m-d\TH:i:s\Z', (time() + $this->oaiConfiguration['expiration_date']))));
-        $resumptionToken->setAttribute('completeListSize', (string) $result['hits']);
-        $resumptionToken->setAttribute('cursor', (string) $requestArguments['start']);
+        $resumptionToken = new Element\ResumptionToken();
+
+        $expirationDate = new \DateTime();
+        $expirationDate->add(new \DateInterval('PT'.$this->oaiConfiguration['expiration_date'].'S'));
+
+        $resumptionToken
+            ->setToken($token)
+            ->setExpirationDate($expirationDate)
+            ->setCompleteListSize((string) $result['hits'])
+            ->setCursor((string) $requestArguments['start']);
+
+        $this->oai->setResumptionToken($resumptionToken);
 
         return $resumptionToken;
     }
 
     private function createRootElement()
     {
-        $this->oai_pmh = $this->oai->createElement('OAI-PMH');
-        foreach ($this->oaiConfiguration['oai_pma'] as $key => $value) {
-            $this->oai_pmh->setAttribute($key, $value);
-        }
+        $this->oai_pmh = new Element\OaiPmh();
 
-        $this->oai->appendChild($this->oai_pmh);
+        $this->oai_pmh->setResponseDate(new \DateTime());
+        $this->oai->setOaiPmh($this->oai_pmh);
 
-        $responseDate = $this->oai->createElement('responseDate', gmdate('Y-m-d\TH:i:s\Z', time()));
-        $this->oai_pmh->appendChild($responseDate);
-
-        $this->request = $this->oai->createElement('request', 'https://gdz.sub.uni-goettingen.de/oai2/');
+        $this->request = new Element\Request();
+        $this->request->setUrl('https://gdz.sub.uni-goettingen.de/oai2/');
+        $this->oai->setRequest($this->request);
     }
 
-    private function listOaiDcRecords(array $result, $key, \DOMElement $metadata)
+    private function listOaiDcRecords(array $result, $key, Metadata $metadata)
     {
         $this->oai_dc = $this->oai->createElement('oai_dc:dc');
         foreach ($this->oaiConfiguration['metadata_format_options']['oai_dc']['dc'] as $attribute => $value) {
@@ -768,15 +766,16 @@ class OaiService implements OaiServiceInterface
         }
     }
 
-    private function listMetsRecords(array $result, $key, \DOMElement $metadata)
+    private function listMetsRecords(array $result, $key, Metadata $metadata)
     {
         foreach ($result['metadata'][$key] as $elementName => $elementValue) {
             $tmp = new \DOMDocument();
             $test = $tmp->loadXML($elementValue);
             if ($test) {
                 $mets = $tmp->getElementsByTagName('mets')->item(0);
-                $import = $this->oai->importNode($mets, true);
-                $metadata->appendChild($import);
+                $mets = $mets->nodeValue;
+
+                $metadata->addElement($mets);
             }
         }
     }
@@ -797,29 +796,29 @@ class OaiService implements OaiServiceInterface
             throw new OaiException('No matching records', 1478853689);
         }
 
-        $listRecordsElement = $this->oai->createElement($requestArguments['verb']);
-        $this->oai_pmh->appendChild($listRecordsElement);
+        $listRecordsElement = new Element\Verb($requestArguments['verb']);
+        $this->oai_pmh->setVerb($listRecordsElement);
         foreach ($result['header'] as $key => $val) {
             if ('ListRecords' === $requestArguments['verb']) {
-                $this->record = $this->oai->createElement('record');
-                $listRecordsElement->appendChild($this->record);
-                $this->head = $this->oai->createElement('header');
-                $this->record->appendChild($this->head);
+                $this->record = new Element\Record();
+                $listRecordsElement->addRecord($this->record);
+                $this->head = new Element\Header();
+                $this->record->setHeader($this->head);
             } else {
-                $this->head = $this->oai->createElement('header');
-                $listRecordsElement->appendChild($this->head);
+                $this->head = new Element\Header();
+                $listRecordsElement->setHeader($this->head);
             }
             foreach ($val as $elementName => $elementValue) {
                 if (is_array($elementValue)) {
                     foreach ($elementValue as $_v) {
-                        $node = $this->oai->createElement($elementName);
-                        $node->appendChild(new \DOMText($_v));
-                        $this->head->appendChild($node);
+                        $node = new Element\HeaderElement($elementName);
+                        $node->setElementValue($_v);
+                        $this->head->addHeaderElement($node);
                     }
                 } else {
-                    $node = $this->oai->createElement($elementName);
-                    $node->appendChild(new \DOMText((string) $elementValue));
-                    $this->head->appendChild($node);
+                    $node = new Element\HeaderElement($elementName);
+                    $node->setElementValue((string) $elementValue);
+                    $this->head->addHeaderElement($node);
                 }
             }
             if ('ListRecords' === $requestArguments['verb']) {
@@ -827,7 +826,7 @@ class OaiService implements OaiServiceInterface
             }
         }
 
-        $listRecordsElement->appendChild($this->getResumptionToken($result, $requestArguments));
+        $listRecordsElement->setResumptionToken($this->getResumptionToken($result, $requestArguments));
     }
 
     /**

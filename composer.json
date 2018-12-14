@@ -10,7 +10,7 @@
         }
     ],
     "autoload": {
-       "psr-4": { "Subugoe\\OaiBundle\\": "" }
+       "psr-4": { "Subugoe\\OaiBundle\\": "src/" }
     },
     "require": {
         "php": "^7.0",
