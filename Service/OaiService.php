@@ -224,7 +224,7 @@ class OaiService implements OaiServiceInterface
         $this->oai->formatOutput = false;
 
         //insert xsl
-        $this->oai->appendChild($this->oai->createProcessingInstruction('xml-stylesheet', 'href="/xsl/oai2.xsl" type="text/xsl"'));
+        $this->oai->appendChild($this->oai->createProcessingInstruction('xml-stylesheet', 'href="/bundles/subugoeoai/xsl/oai2.xsl" type="text/xsl"'));
 
         $this->createRootElement();
 
