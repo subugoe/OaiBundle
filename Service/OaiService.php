@@ -9,7 +9,7 @@ use Subugoe\OaiBundle\Exception\OaiException;
 use League\Flysystem\FileNotFoundException;
 use League\Flysystem\FilesystemInterface;
 use Solarium\Client;
-use Subugoe\IIIFBundle\Model\Document;
+use Subugoe\IIIFModel\Model\Document;
 use Subugoe\IIIFBundle\Translator\TranslatorInterface;
 use Subugoe\OaiBundle\Model\Collection;
 use Subugoe\OaiBundle\Model\Identify\Description;
@@ -87,6 +87,8 @@ class OaiService implements OaiServiceInterface
 
     /**
      * OaiService constructor.
+     * @param TranslatorInterface $translator
+     * @param \Symfony\Contracts\Translation\TranslatorInterface $translation
      */
     public function __construct(
         TranslatorInterface $translator,
@@ -96,22 +98,22 @@ class OaiService implements OaiServiceInterface
         $this->translation = $translation;
     }
 
-    public function setRequestStack(RequestStack $requestStack)
+    public function setRequestStack(RequestStack $requestStack): void
     {
         $this->requestStack = $requestStack;
     }
 
-    public function setFilesystem(Filesystem $filesystem)
+    public function setFilesystem(Filesystem $filesystem): void
     {
         $this->oaiTempDirectory = $filesystem;
     }
 
-    public function setOaiConfiguration(array $config)
+    public function setOaiConfiguration(array $config): void
     {
         $this->oaiConfiguration = $config;
     }
 
-    public function setClient(Client $client)
+    public function setClient(Client $client): void
     {
         $this->client = $client;
     }
@@ -254,7 +256,7 @@ class OaiService implements OaiServiceInterface
         return $this->oai->saveXML();
     }
 
-    public function deleteExpiredResumptionTokens()
+    public function deleteExpiredResumptionTokens(): void
     {
         $time = time() - 259200;
         $contents = $this->oaiTempDirectory->listContents('/oai-gdz/');
@@ -265,7 +267,7 @@ class OaiService implements OaiServiceInterface
         }
     }
 
-    protected function listRecords(array $requestArguments, array $result, $key)
+    protected function listRecords(array $requestArguments, array $result, $key): void
     {
         $metadata = $this->oai->createElement('metadata');
         $this->record->appendChild($metadata);
@@ -308,15 +310,15 @@ class OaiService implements OaiServiceInterface
      *
      * @throws OaiException
      */
-    private function errorFromUntil(array &$requestArguments)
+    private function errorFromUntil(array &$requestArguments): void
     {
-        if (isset($requestArguments['from']) && isset($requestArguments['until'])) {
+        if (isset($requestArguments['from'], $requestArguments['until'])) {
             if ((strlen($requestArguments['from'])) !== (strlen($requestArguments['until']))) {
                 throw new OaiException(sprintf('Bad argument. from: %s until %s', $requestArguments['from'], $requestArguments['until']), 1478852818);
-            } else {
-                if (($requestArguments['from']) > ($requestArguments['until'])) {
-                    throw new OaiException(sprintf('Bad argument. from: %s until %s', $requestArguments['from'], $requestArguments['until']), 1478852845);
-                }
+            }
+
+            if (($requestArguments['from']) > ($requestArguments['until'])) {
+                throw new OaiException(sprintf('Bad argument. from: %s until %s', $requestArguments['from'], $requestArguments['until']), 1478852845);
             }
         }
     }
@@ -326,7 +328,7 @@ class OaiService implements OaiServiceInterface
      *
      * @throws OaiException
      */
-    private function errorMetaDataPrefix(array &$requestArguments)
+    private function errorMetaDataPrefix(array &$requestArguments): void
     {
         if (isset($requestArguments['metadataPrefix'])) {
             if (!array_key_exists($requestArguments['metadataPrefix'], $this->oaiConfiguration['metadata_formats'])) {
@@ -442,7 +444,7 @@ class OaiService implements OaiServiceInterface
     {
         foreach ($requestArguments as $key => $val) {
             if ('verb' !== $key && !@in_array($key, explode(',', $this->oaiConfiguration['verbs'][$verb]['allowedArguments']))) {
-                throw new OaiException(sprintf('Bad argument: %: %', $key, $val), 1478853155);
+                throw new OaiException(sprintf('Bad argument: %s: %s', $key, $val), 1478853155);
             }
         }
     }
@@ -468,7 +470,7 @@ class OaiService implements OaiServiceInterface
         if (count($requiredArguments)) {
             $noerror = false;
             foreach ($requiredArguments as $requiredArgument) {
-                throw new OaiException(sprintf('Bad argument: %: %', $requiredArgument, ''), 1478853229);
+                throw new OaiException(sprintf('Bad argument: %s: %s', $requiredArgument, ''), 1478853229);
             }
         } else {
             $noerror = true;
@@ -516,7 +518,7 @@ class OaiService implements OaiServiceInterface
         if (!isset($arr['start'])) {
             $arr['start'] = 0;
         } else {
-            $arr['start'] = $arr['start'] + $arr['maxresults'];
+            $arr['start'] += $arr['maxresults'];
         }
         $arrResult['header'] = [];
         $arrResult['records'] = [];
@@ -547,7 +549,7 @@ class OaiService implements OaiServiceInterface
             }
             if (isset($arr['set'])) {
                 $arrTmp = explode('_', trim($arr['set']));
-                for ($i = 1; $i < count($arrTmp); $i = $i + 2) {
+                for ($i = 1, $iMax = count($arrTmp); $i < $iMax; $i += 2) {
                     $addWhere .= ' ('.$arrTmp[$i - 1].':'.$arrTmp[$i].')';
                 }
                 unset($arrTmp);
@@ -575,7 +577,7 @@ class OaiService implements OaiServiceInterface
             }
         }
 
-        for ($i = 0; $i < min($arrResult['hits'], $arr['maxresults'], count($res->getDocuments())); ++$i) {
+        for ($i = 0, $iMax = min($arrResult['hits'], $arr['maxresults'], count($res->getDocuments())); $i < $iMax; ++$i) {
             /** @var Document $document */
             $document = $res->getDocument($i);
 
@@ -616,13 +618,12 @@ class OaiService implements OaiServiceInterface
                         foreach ($this->oaiConfiguration['metadata_format_options']['oai_dc']['identifier'] as $key => $val) {
                             $metadata = $document->getMetadata();
                             if (isset($metadata[$key])) {
-                                array_push($arrResult['metadata'][$i]['dc:identifier'], trim($val).' '.$metadata[$key]);
+                                $arrResult['metadata'][$i]['dc:identifier'][] = trim($val) . ' ' . $metadata[$key];
                             }
                         }
                         foreach ($document->getAdditionalIdentifiers() as $key => $val) {
                             if ($val && isset($this->oaiConfiguration['metadata_format_options']['oai_dc']['identifier'][$key])) {
-                                array_push($arrResult['metadata'][$i]['dc:identifier'],
-                                    trim($this->oaiConfiguration['metadata_format_options']['oai_dc']['identifier'][$key]).' '.trim($val));
+                                $arrResult['metadata'][$i]['dc:identifier'][] = trim($this->oaiConfiguration['metadata_format_options']['oai_dc']['identifier'][$key]) . ' ' . trim($val);
                             }
                         }
                         //Zeitschriftenband
@@ -679,7 +680,7 @@ class OaiService implements OaiServiceInterface
         $rows = $configuration['maxresults'] ?? 10;
         $start = $configuration['start'] ?? 0;
         $direction = $reverse ? 'desc' : 'asc';
-        $query = $query.' -doctype:fulltext';
+        $query .= ' -doctype:fulltext';
 
         $solrQuery = $this->client
             ->createSelect()
@@ -715,7 +716,7 @@ class OaiService implements OaiServiceInterface
      */
     private function getResumptionToken(array $result, array $requestArguments): \DOMElement
     {
-        $token = isset($result['token']) ? $result['token'] : '';
+        $token = $result['token'] ?? '';
 
         $resumptionToken = $this->oai->createElement('resumptionToken', $token);
         $resumptionToken->setAttribute('expirationDate', (gmdate('Y-m-d\TH:i:s\Z', (time() + $this->oaiConfiguration['expiration_date']))));
@@ -786,7 +787,7 @@ class OaiService implements OaiServiceInterface
      *
      * @throws OaiException
      */
-    private function getListRecordsAndListIdentifiers($requestArguments)
+    private function getListRecordsAndListIdentifiers($requestArguments): void
     {
         //error handling
         $this->errorDate($requestArguments);

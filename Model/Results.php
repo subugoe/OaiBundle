@@ -2,7 +2,7 @@
 
 namespace Subugoe\OaiBundle\Model;
 
-use Subugoe\IIIFBundle\Model\Document;
+use Subugoe\IIIFModel\Model\Document;
 
 class Results
 {

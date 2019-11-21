@@ -14,7 +14,7 @@ interface OaiServiceInterface
      */
     public function start(): string;
 
-    public function deleteExpiredResumptionTokens();
+    public function deleteExpiredResumptionTokens(): void;
 
     public function getIdentify(string $url, array $oaiConfiguration): Identify;
 
