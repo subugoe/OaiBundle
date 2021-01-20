@@ -591,7 +591,7 @@ class OaiService implements OaiServiceInterface
                     }
                 }
             }
-            if (isset($arr['set']) && !in_array($arr['set'], $arrResult['header'][$i]['setSpec']) && isset($arrResult['header'][$i]['setSpec'])) {
+            if (array_key_exists('setSpec', $arrResult['header'][$i]) && isset($arr['set']) && !in_array($arr['set'], $arrResult['header'][$i]['setSpec']) && isset($arrResult['header'][$i]['setSpec'])) {
                 array_unshift($arrResult['header'][$i]['setSpec'], $arr['set']);
             }
             if (isset($arrResult['header'][$i]['setSpec'])) {
