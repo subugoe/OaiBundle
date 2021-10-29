@@ -7,27 +7,42 @@ namespace Subugoe\OaiBundle\Controller;
 use JMS\Serializer\SerializerInterface;
 use Subugoe\OaiBundle\Model\Identify\Identify;
 use Subugoe\OaiBundle\Service\OaiServiceInterface;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 
 class OaiController extends AbstractController
 {
+    /**
+     * @var OaiServiceInterface
+     */
+    private $oaiService;
     /**
      * @var SerializerInterface
      */
     private $serializer;
 
-    /**
-     * @var OaiServiceInterface
-     */
-    private $oaiService;
-
     public function __construct(SerializerInterface $serializer, OaiServiceInterface $oaiService)
     {
         $this->serializer = $serializer;
         $this->oaiService = $oaiService;
+    }
+
+    /**
+     * @Route("/oai2/verb/Identify")
+     */
+    public function identify(Request $request)
+    {
+        $url = $request->getSchemeAndHttpHost().$request->getPathInfo();
+        $oaiConfiguration = $this->getParameter('oai');
+        $identify = $this->oaiService->getIdentify($url, $oaiConfiguration);
+
+        $response = new Response();
+        $response->setContent($this->serializer->serialize($identify, 'xml'));
+        $response->headers->add(['Content-Type' => 'application/xml']);
+
+        return $response;
     }
 
     /**
@@ -51,22 +66,6 @@ class OaiController extends AbstractController
         $response->setStatusCode(Response::HTTP_OK);
 
         $this->oaiService->deleteExpiredResumptionTokens();
-
-        return $response;
-    }
-
-    /**
-     * @Route("/oai2/verb/Identify")
-     */
-    public function identify(Request $request)
-    {
-        $url = $request->getSchemeAndHttpHost().$request->getPathInfo();
-        $oaiConfiguration = $this->getParameter('oai');
-        $identify = $this->oaiService->getIdentify($url, $oaiConfiguration);
-
-        $response = new Response();
-        $response->setContent($this->serializer->serialize($identify, 'xml'));
-        $response->headers->add(['Content-Type' => 'application/xml']);
 
         return $response;
     }

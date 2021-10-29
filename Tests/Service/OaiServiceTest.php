@@ -2,8 +2,8 @@
 
 namespace Subugoe\OaiBundle\Tests\Service;
 
-use Subugoe\OaiBundle\Service\OaiService;
 use PHPUnit\Framework\TestCase;
+use Subugoe\OaiBundle\Service\OaiService;
 
 class OaiServiceTest extends TestCase
 {

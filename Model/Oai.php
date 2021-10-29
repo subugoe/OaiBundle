@@ -25,17 +25,17 @@ class Oai
      */
     private $request;
 
-    /**
-     * @return \DateTimeImmutable
-     */
     public function getDate(): \DateTimeImmutable
     {
         return $this->date;
     }
 
+    public function getRequest(): Request
+    {
+        return $this->request;
+    }
+
     /**
-     * @param \DateTimeImmutable $date
-     *
      * @return Oai
      */
     public function setDate(\DateTimeImmutable $date): self
@@ -46,16 +46,6 @@ class Oai
     }
 
     /**
-     * @return Request
-     */
-    public function getRequest(): Request
-    {
-        return $this->request;
-    }
-
-    /**
-     * @param Request $request
-     *
      * @return Oai
      */
     public function setRequest(Request $request): self

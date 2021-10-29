@@ -8,6 +8,12 @@ class MetadataFormat
 {
     /**
      * @var string
+     * @Serializer\SerializedName("metadataNamespace")
+     * @Serializer\XmlElement(cdata=false)
+     */
+    private $namespace;
+    /**
+     * @var string
      * @Serializer\SerializedName("metadataPrefix")
      * @Serializer\XmlElement(cdata=false)
      */
@@ -19,24 +25,32 @@ class MetadataFormat
      */
     private $schema;
 
-    /**
-     * @var string
-     * @Serializer\SerializedName("metadataNamespace")
-     * @Serializer\XmlElement(cdata=false)
-     */
-    private $namespace;
+    public function getNamespace(): string
+    {
+        return $this->namespace;
+    }
 
-    /**
-     * @return string
-     */
     public function getPrefix(): string
     {
         return $this->prefix;
     }
 
+    public function getSchema(): string
+    {
+        return $this->schema;
+    }
+
     /**
-     * @param string $prefix
-     *
+     * @return MetadataFormat
+     */
+    public function setNamespace(string $namespace): self
+    {
+        $this->namespace = $namespace;
+
+        return $this;
+    }
+
+    /**
      * @return MetadataFormat
      */
     public function setPrefix(string $prefix): self
@@ -47,41 +61,11 @@ class MetadataFormat
     }
 
     /**
-     * @return string
-     */
-    public function getSchema(): string
-    {
-        return $this->schema;
-    }
-
-    /**
-     * @param string $schema
-     *
      * @return MetadataFormat
      */
     public function setSchema(string $schema): self
     {
         $this->schema = $schema;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getNamespace(): string
-    {
-        return $this->namespace;
-    }
-
-    /**
-     * @param string $namespace
-     *
-     * @return MetadataFormat
-     */
-    public function setNamespace(string $namespace): self
-    {
-        $this->namespace = $namespace;
 
         return $this;
     }

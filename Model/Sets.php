@@ -13,17 +13,12 @@ class Sets extends Oai
      */
     private $sets;
 
-    /**
-     * @return array
-     */
     public function getSets(): array
     {
         return $this->sets;
     }
 
     /**
-     * @param array $sets
-     *
      * @return Sets
      */
     public function setSets(array $sets): self

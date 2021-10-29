@@ -9,16 +9,16 @@ use Subugoe\OaiBundle\Model\Sets;
 
 interface OaiServiceInterface
 {
-    /**
-     * @throws OaiException
-     */
-    public function start(): string;
-
     public function deleteExpiredResumptionTokens(): void;
 
     public function getIdentify(string $url, array $oaiConfiguration): Identify;
 
+    public function getListSets(string $url, array $oaiConfiguration): Sets;
+
     public function getMetadataFormats(string $url, array $oaiConfiguration, ?string $identifier): MetadataFormats;
 
-    public function getListSets(string $url, array $oaiConfiguration): Sets;
+    /**
+     * @throws OaiException
+     */
+    public function start(): string;
 }

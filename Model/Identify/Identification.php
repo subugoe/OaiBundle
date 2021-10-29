@@ -9,9 +9,9 @@ class Identification
     /**
      * @var string
      * @Serializer\XmlElement(cdata=false)
-     * @Serializer\SerializedName("repositoryName")
+     * @Serializer\SerializedName("adminEmail")
      */
-    private $repositoryName;
+    private $adminEmail;
 
     /**
      * @var string
@@ -23,16 +23,14 @@ class Identification
     /**
      * @var string
      * @Serializer\XmlElement(cdata=false)
-     * @Serializer\SerializedName("protocolVersion")
+     * @Serializer\SerializedName("deletedRecord")
      */
-    private $protocolVersion;
+    private $deletedRecord;
 
     /**
-     * @var string
-     * @Serializer\XmlElement(cdata=false)
-     * @Serializer\SerializedName("adminEmail")
+     * @var Description
      */
-    private $adminEmail;
+    private $description;
 
     /**
      * @var \DateTimeImmutable
@@ -44,92 +42,63 @@ class Identification
     /**
      * @var string
      * @Serializer\XmlElement(cdata=false)
-     * @Serializer\SerializedName("deletedRecord")
-     */
-    private $deletedRecord;
-
-    /**
-     * @var string
-     * @Serializer\XmlElement(cdata=false)
      */
     private $granularity;
 
     /**
-     * @var Description
+     * @var string
+     * @Serializer\XmlElement(cdata=false)
+     * @Serializer\SerializedName("protocolVersion")
      */
-    private $description;
-
+    private $protocolVersion;
     /**
-     * @return string
+     * @var string
+     * @Serializer\XmlElement(cdata=false)
+     * @Serializer\SerializedName("repositoryName")
      */
+    private $repositoryName;
+
+    public function getAdminEmail(): string
+    {
+        return $this->adminEmail;
+    }
+
+    public function getBaseUrl(): string
+    {
+        return $this->baseUrl;
+    }
+
+    public function getDeletedRecord(): string
+    {
+        return $this->deletedRecord;
+    }
+
+    public function getDescription(): Description
+    {
+        return $this->description;
+    }
+
+    public function getEarliestDatestamp(): \DateTimeImmutable
+    {
+        return $this->earliestDatestamp;
+    }
+
+    public function getGranularity(): string
+    {
+        return $this->granularity;
+    }
+
+    public function getProtocolVersion(): string
+    {
+        return $this->protocolVersion;
+    }
+
     public function getRepositoryName(): string
     {
         return $this->repositoryName;
     }
 
     /**
-     * @param string $repositoryName
-     *
-     * @return Identification
-     */
-    public function setRepositoryName(string $repositoryName): self
-    {
-        $this->repositoryName = $repositoryName;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getBaseUrl(): string
-    {
-        return $this->baseUrl;
-    }
-
-    /**
-     * @param string $baseUrl
-     *
-     * @return Identification
-     */
-    public function setBaseUrl(string $baseUrl): self
-    {
-        $this->baseUrl = $baseUrl;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getProtocolVersion(): string
-    {
-        return $this->protocolVersion;
-    }
-
-    /**
-     * @param string $protocolVersion
-     *
-     * @return Identification
-     */
-    public function setProtocolVersion(string $protocolVersion): self
-    {
-        $this->protocolVersion = $protocolVersion;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAdminEmail(): string
-    {
-        return $this->adminEmail;
-    }
-
-    /**
-     * @param string $adminEmail
-     *
      * @return Identification
      */
     public function setAdminEmail(string $adminEmail): self
@@ -140,36 +109,16 @@ class Identification
     }
 
     /**
-     * @return \DateTimeImmutable
-     */
-    public function getEarliestDatestamp(): \DateTimeImmutable
-    {
-        return $this->earliestDatestamp;
-    }
-
-    /**
-     * @param \DateTimeImmutable $earliestDatestamp
-     *
      * @return Identification
      */
-    public function setEarliestDatestamp(\DateTimeImmutable $earliestDatestamp): self
+    public function setBaseUrl(string $baseUrl): self
     {
-        $this->earliestDatestamp = $earliestDatestamp;
+        $this->baseUrl = $baseUrl;
 
         return $this;
     }
 
     /**
-     * @return string
-     */
-    public function getDeletedRecord(): string
-    {
-        return $this->deletedRecord;
-    }
-
-    /**
-     * @param string $deletedRecord
-     *
      * @return Identification
      */
     public function setDeletedRecord(string $deletedRecord): self
@@ -180,16 +129,26 @@ class Identification
     }
 
     /**
-     * @return string
+     * @return Identification
      */
-    public function getGranularity(): string
+    public function setDescription(Description $description): self
     {
-        return $this->granularity;
+        $this->description = $description;
+
+        return $this;
     }
 
     /**
-     * @param string $granularity
-     *
+     * @return Identification
+     */
+    public function setEarliestDatestamp(\DateTimeImmutable $earliestDatestamp): self
+    {
+        $this->earliestDatestamp = $earliestDatestamp;
+
+        return $this;
+    }
+
+    /**
      * @return Identification
      */
     public function setGranularity(string $granularity): self
@@ -200,21 +159,21 @@ class Identification
     }
 
     /**
-     * @return Description
+     * @return Identification
      */
-    public function getDescription(): Description
+    public function setProtocolVersion(string $protocolVersion): self
     {
-        return $this->description;
+        $this->protocolVersion = $protocolVersion;
+
+        return $this;
     }
 
     /**
-     * @param Description $description
-     *
      * @return Identification
      */
-    public function setDescription(Description $description): self
+    public function setRepositoryName(string $repositoryName): self
     {
-        $this->description = $description;
+        $this->repositoryName = $repositoryName;
 
         return $this;
     }

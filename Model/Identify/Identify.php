@@ -11,17 +11,12 @@ class Identify extends Oai
      */
     private $identify;
 
-    /**
-     * @return Identification
-     */
     public function getIdentify(): Identification
     {
         return $this->identify;
     }
 
     /**
-     * @param Identification $identify
-     *
      * @return Identify
      */
     public function setIdentify(Identification $identify): self

@@ -12,13 +12,6 @@ class Collection
     /**
      * @var string
      * @Serializer\Expose()
-     * @Serializer\SerializedName("setName")
-     */
-    private $label;
-
-    /**
-     * @var string
-     * @Serializer\Expose()
      */
     private $description;
 
@@ -35,38 +28,34 @@ class Collection
      * @Serializer\Expose()
      */
     private $image;
-
     /**
-     * @return string
+     * @var string
+     * @Serializer\Expose()
+     * @Serializer\SerializedName("setName")
      */
+    private $label;
+
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    public function getImage(): string
+    {
+        return $this->image;
+    }
+
     public function getLabel(): string
     {
         return $this->label;
     }
 
     /**
-     * @param string $label
-     *
-     * @return Collection
-     */
-    public function setLabel(string $label): self
-    {
-        $this->label = $label;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDescription(): string
-    {
-        return $this->description;
-    }
-
-    /**
-     * @param string $description
-     *
      * @return Collection
      */
     public function setDescription(string $description): self
@@ -77,16 +66,6 @@ class Collection
     }
 
     /**
-     * @return string
-     */
-    public function getId(): string
-    {
-        return $this->id;
-    }
-
-    /**
-     * @param string $id
-     *
      * @return Collection
      */
     public function setId(string $id): self
@@ -97,21 +76,21 @@ class Collection
     }
 
     /**
-     * @return string
-     */
-    public function getImage(): string
-    {
-        return $this->image;
-    }
-
-    /**
-     * @param string $image
-     *
      * @return Collection
      */
     public function setImage(string $image): self
     {
         $this->image = $image;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function setLabel(string $label): self
+    {
+        $this->label = $label;
 
         return $this;
     }

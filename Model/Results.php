@@ -7,54 +7,13 @@ use Subugoe\IIIFModel\Model\Document;
 class Results
 {
     /**
-     * @var int
-     */
-    private $foundCount = 0;
-
-    /**
      * @var array
      */
     private $documents = [];
-
     /**
-     * @return int
+     * @var int
      */
-    public function getFoundCount(): int
-    {
-        return $this->foundCount;
-    }
-
-    /**
-     * @param int $foundCount
-     *
-     * @return Results
-     */
-    public function setFoundCount(int $foundCount): self
-    {
-        $this->foundCount = $foundCount;
-
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getDocuments(): array
-    {
-        return $this->documents;
-    }
-
-    /**
-     * @param array $documents
-     *
-     * @return Results
-     */
-    public function setDocuments(array $documents): self
-    {
-        $this->documents = $documents;
-
-        return $this;
-    }
+    private $foundCount = 0;
 
     public function addDocument(Document $document)
     {
@@ -64,5 +23,35 @@ class Results
     public function getDocument(int $position): Document
     {
         return $this->documents[$position];
+    }
+
+    public function getDocuments(): array
+    {
+        return $this->documents;
+    }
+
+    public function getFoundCount(): int
+    {
+        return $this->foundCount;
+    }
+
+    /**
+     * @return Results
+     */
+    public function setDocuments(array $documents): self
+    {
+        $this->documents = $documents;
+
+        return $this;
+    }
+
+    /**
+     * @return Results
+     */
+    public function setFoundCount(int $foundCount): self
+    {
+        $this->foundCount = $foundCount;
+
+        return $this;
     }
 }

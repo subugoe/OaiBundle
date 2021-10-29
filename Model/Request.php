@@ -11,6 +11,11 @@ class Request
 {
     /**
      * @var string
+     * @Serializer\XmlAttribute
+     */
+    private $identifier;
+    /**
+     * @var string
      * @Serializer\XmlValue
      * @Serializer\XmlElement(cdata=false)
      */
@@ -22,23 +27,32 @@ class Request
      */
     private $verb;
 
-    /**
-     * @var string
-     * @Serializer\XmlAttribute
-     */
-    private $identifier;
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
+    }
 
-    /**
-     * @return string
-     */
     public function getUrl(): string
     {
         return $this->url;
     }
 
+    public function getVerb(): string
+    {
+        return $this->verb;
+    }
+
     /**
-     * @param string $url
-     *
+     * @return Request
+     */
+    public function setIdentifier(string $identifier): self
+    {
+        $this->identifier = $identifier;
+
+        return $this;
+    }
+
+    /**
      * @return Request
      */
     public function setUrl(string $url): self
@@ -49,41 +63,11 @@ class Request
     }
 
     /**
-     * @return string
-     */
-    public function getVerb(): string
-    {
-        return $this->verb;
-    }
-
-    /**
-     * @param string $verb
-     *
      * @return Request
      */
     public function setVerb(string $verb): self
     {
         $this->verb = $verb;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getIdentifier(): string
-    {
-        return $this->identifier;
-    }
-
-    /**
-     * @param string $identifier
-     *
-     * @return Request
-     */
-    public function setIdentifier(string $identifier): self
-    {
-        $this->identifier = $identifier;
 
         return $this;
     }
