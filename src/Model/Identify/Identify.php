@@ -6,10 +6,7 @@ use Subugoe\OaiBundle\Model\Oai;
 
 class Identify extends Oai
 {
-    /**
-     * @var Identification
-     */
-    private $identify;
+    private ?\Subugoe\OaiBundle\Model\Identify\Identification $identify = null;
 
     public function getIdentify(): Identification
     {

@@ -10,22 +10,19 @@ use JMS\Serializer\Annotation as Serializer;
 class Request
 {
     /**
-     * @var string
      * @Serializer\XmlAttribute
      */
-    private $identifier;
+    private ?string $identifier = null;
     /**
-     * @var string
      * @Serializer\XmlValue
      * @Serializer\XmlElement(cdata=false)
      */
-    private $url;
+    private ?string $url = null;
 
     /**
-     * @var string
      * @Serializer\XmlAttribute
      */
-    private $verb;
+    private ?string $verb = null;
 
     public function getIdentifier(): string
     {

@@ -14,14 +14,8 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class OaiController extends AbstractController
 {
-    /**
-     * @var OaiServiceInterface
-     */
-    private $oaiService;
-    /**
-     * @var SerializerInterface
-     */
-    private $serializer;
+    private \Subugoe\OaiBundle\Service\OaiServiceInterface $oaiService;
+    private \JMS\Serializer\SerializerInterface $serializer;
 
     public function __construct(SerializerInterface $serializer, OaiServiceInterface $oaiService)
     {

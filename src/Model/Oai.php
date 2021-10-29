@@ -13,17 +13,15 @@ use JMS\Serializer\Annotation as Serializer;
 class Oai
 {
     /**
-     * @var \DateTimeImmutable
      * @Serializer\XmlElement(cdata=false)
      * @Serializer\SerializedName("responseDate")
      */
-    private $date;
+    private ?\DateTimeImmutable $date = null;
 
     /**
-     * @var Request
      * @Serializer\XmlElement(cdata=false)
      */
-    private $request;
+    private ?\Subugoe\OaiBundle\Model\Request $request = null;
 
     public function getDate(): \DateTimeImmutable
     {

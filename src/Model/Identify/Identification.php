@@ -7,56 +7,46 @@ use JMS\Serializer\Annotation as Serializer;
 class Identification
 {
     /**
-     * @var string
      * @Serializer\XmlElement(cdata=false)
      * @Serializer\SerializedName("adminEmail")
      */
-    private $adminEmail;
+    private ?string $adminEmail = null;
 
     /**
-     * @var string
      * @Serializer\XmlElement(cdata=false)
      * @Serializer\SerializedName("baseURL")
      */
-    private $baseUrl;
+    private ?string $baseUrl = null;
 
     /**
-     * @var string
      * @Serializer\XmlElement(cdata=false)
      * @Serializer\SerializedName("deletedRecord")
      */
-    private $deletedRecord;
+    private ?string $deletedRecord = null;
+
+    private ?\Subugoe\OaiBundle\Model\Identify\Description $description = null;
 
     /**
-     * @var Description
-     */
-    private $description;
-
-    /**
-     * @var \DateTimeImmutable
      * @Serializer\XmlElement(cdata=false)
      * @Serializer\SerializedName("earliestDatestamp")
      */
-    private $earliestDatestamp;
+    private ?\DateTimeImmutable $earliestDatestamp = null;
 
     /**
-     * @var string
      * @Serializer\XmlElement(cdata=false)
      */
-    private $granularity;
+    private ?string $granularity = null;
 
     /**
-     * @var string
      * @Serializer\XmlElement(cdata=false)
      * @Serializer\SerializedName("protocolVersion")
      */
-    private $protocolVersion;
+    private ?string $protocolVersion = null;
     /**
-     * @var string
      * @Serializer\XmlElement(cdata=false)
      * @Serializer\SerializedName("repositoryName")
      */
-    private $repositoryName;
+    private ?string $repositoryName = null;
 
     public function getAdminEmail(): string
     {

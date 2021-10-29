@@ -24,65 +24,32 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class OaiService implements OaiServiceInterface
 {
-    /**
-     * @var \DOMDocument
-     */
-    public $oai;
+    public ?\DOMDocument $oai = null;
 
-    /**
-     * @var Client
-     */
-    private $client;
+    private ?\Solarium\Client $client = null;
 
-    /**
-     * @var \DOMElement
-     */
-    private $head;
+    private ?\DOMElement $head = null;
 
-    /**
-     * @var \DOMElement
-     */
-    private $oai_dc;
+    private ?\DOMElement $oai_dc = null;
 
-    /**
-     * @var \DOMElement
-     */
-    private $oai_pmh;
+    private ?\DOMElement $oai_pmh = null;
 
-    /**
-     * @var array
-     */
-    private $oaiConfiguration;
+    private ?array $oaiConfiguration = null;
 
-    /**
-     * @var Filesystem
-     */
-    private $oaiTempDirectory;
+    private ?\League\Flysystem\Filesystem $oaiTempDirectory = null;
 
-    /**
-     * @var \DOMElement
-     */
-    private $record;
+    private ?\DOMElement $record = null;
 
-    /**
-     * @var \DOMElement
-     */
-    private $request;
+    private ?\DOMElement $request = null;
 
-    /**
-     * @var RequestStack
-     */
-    private $requestStack;
+    private ?\Symfony\Component\HttpFoundation\RequestStack $requestStack = null;
 
     /**
      * @var \Symfony\Contracts\Translation\TranslatorInterface
      */
     private $translation;
 
-    /**
-     * @var TranslatorInterface
-     */
-    private $translator;
+    private \Subugoe\IIIFBundle\Translator\TranslatorInterface $translator;
 
     /**
      * OaiService constructor.
@@ -300,7 +267,7 @@ class OaiService implements OaiServiceInterface
     {
         foreach ($requestArguments as $key => $val) {
             if ('verb' !== $key && !@in_array($key, explode(',', $this->oaiConfiguration['verbs'][$verb]['allowedArguments']))) {
-                throw new OaiException(sprintf('Bad argument: %s: %s', $key, $val), 1478853155);
+                throw new OaiException(sprintf('Bad argument: %s: %s', $key, $val), 1_478_853_155);
             }
         }
     }
@@ -313,15 +280,13 @@ class OaiService implements OaiServiceInterface
         $arrDates = ['from' => '00:00:00', 'until' => '23:59:59'];
         foreach ($arrDates as $key => $val) {
             if (isset($requestArguments[$key])) {
-                preg_match('/([0-9]{4})-([0-9]{2})-([0-9]{2})(([T]{1})([0-9]{2}):([0-9]{2}):([0-9]{2})([Z]{1}){1})?/', $requestArguments[$key], $regs);
+                preg_match('/(\d{4})-(\d{2})-(\d{2})(([T]{1})(\d{2}):(\d{2}):(\d{2})([Z]{1}){1})?/', $requestArguments[$key], $regs);
                 if ('' !== $regs[1] && isset($regs[4]) && '' !== $regs[4]) {
                     $requestArguments['DB'.$key] = $regs[1].'-'.$regs[2].'-'.$regs[3].' '.$regs[6].':'.$regs[7].':'.$regs[8];
+                } elseif ('' !== $regs[1] && 10 === strlen($requestArguments[$key])) {
+                    $requestArguments['DB'.$key] = $regs[1].'-'.$regs[2].'-'.$regs[3].' '.$val;
                 } else {
-                    if ('' !== $regs[1] && 10 === strlen($requestArguments[$key])) {
-                        $requestArguments['DB'.$key] = $regs[1].'-'.$regs[2].'-'.$regs[3].' '.$val;
-                    } else {
-                        throw new OaiException(sprintf('Bad argument. %s: %s', $key, $requestArguments[$key]), 1478853737);
-                    }
+                    throw new OaiException(sprintf('Bad argument. %s: %s', $key, $requestArguments[$key]), 1_478_853_737);
                 }
             }
         }
@@ -334,11 +299,11 @@ class OaiService implements OaiServiceInterface
     {
         if (isset($requestArguments['from'], $requestArguments['until'])) {
             if ((strlen($requestArguments['from'])) !== (strlen($requestArguments['until']))) {
-                throw new OaiException(sprintf('Bad argument. from: %s until %s', $requestArguments['from'], $requestArguments['until']), 1478852818);
+                throw new OaiException(sprintf('Bad argument. from: %s until %s', $requestArguments['from'], $requestArguments['until']), 1_478_852_818);
             }
 
             if (($requestArguments['from']) > ($requestArguments['until'])) {
-                throw new OaiException(sprintf('Bad argument. from: %s until %s', $requestArguments['from'], $requestArguments['until']), 1478852845);
+                throw new OaiException(sprintf('Bad argument. from: %s until %s', $requestArguments['from'], $requestArguments['until']), 1_478_852_845);
             }
         }
     }
@@ -350,10 +315,10 @@ class OaiService implements OaiServiceInterface
     {
         if (isset($requestArguments['metadataPrefix'])) {
             if (!array_key_exists($requestArguments['metadataPrefix'], $this->oaiConfiguration['metadata_formats'])) {
-                throw new OaiException(sprintf('Bad argument. metadataPrefix %s', $requestArguments['metadataPrefix']), 1478852962);
+                throw new OaiException(sprintf('Bad argument. metadataPrefix %s', $requestArguments['metadataPrefix']), 1_478_852_962);
             }
         } else {
-            throw new OaiException(sprintf('Bad argument. metadataPrefix %s', ''), 1478853001);
+            throw new OaiException(sprintf('Bad argument. metadataPrefix %s', ''), 1_478_853_001);
         }
     }
 
@@ -370,10 +335,10 @@ class OaiService implements OaiServiceInterface
                 reset($requiredArguments);
             }
         }
-        if (count($requiredArguments)) {
+        if (count($requiredArguments) > 0) {
             $noerror = false;
             foreach ($requiredArguments as $requiredArgument) {
-                throw new OaiException(sprintf('Bad argument: %s: %s', $requiredArgument, ''), 1478853229);
+                throw new OaiException(sprintf('Bad argument: %s: %s', $requiredArgument, ''), 1_478_853_229);
             }
         } else {
             $noerror = true;
@@ -394,8 +359,8 @@ class OaiService implements OaiServiceInterface
         $this->errorMetaDataPrefix($requestArguments);
         $this->errorFromUntil($requestArguments);
         $result = $this->getRecords($requestArguments);
-        if (0 === count($result)) {
-            throw new OaiException('No matching records', 1478853689);
+        if ([] === $result) {
+            throw new OaiException('No matching records', 1_478_853_689);
         }
 
         $listRecordsElement = $this->oai->createElement($requestArguments['verb']);
@@ -445,7 +410,7 @@ class OaiService implements OaiServiceInterface
         $result = $this->getRecords($requestArguments);
 
         if (!$result['hits']) {
-            throw new OaiException('No Records Match', 1478853666);
+            throw new OaiException('No Records Match', 1_478_853_666);
         }
 
         $listRecordsElement = $this->oai->createElement($requestArguments['verb']);
@@ -485,11 +450,7 @@ class OaiService implements OaiServiceInterface
                                     if (is_array($_v)) {
                                         $_v = implode(' ', $_v);
                                     }
-                                    if ('dc:description' === $elementName) {
-                                        $data = $this->oai->createCDATASection($_v);
-                                    } else {
-                                        $data = new \DOMText((string) $_v);
-                                    }
+                                    $data = 'dc:description' === $elementName ? $this->oai->createCDATASection($_v) : new \DOMText((string) $_v);
                                     $node = $this->oai->createElement($elementName);
                                     $node->appendChild($data);
                                     $this->oai_dc->appendChild($node);
@@ -573,19 +534,13 @@ class OaiService implements OaiServiceInterface
             }
             $addWhere .= '';
         }
-        if ($arr['metadataPrefix']) {
-            $mPrefix = $arr['metadataPrefix'];
-        } else {
-            $mPrefix = 'oai_dc';
-        }
+        $mPrefix = $arr['metadataPrefix'] ? $arr['metadataPrefix'] : 'oai_dc';
 
         $res = $this->query($this->oaiConfiguration['query_parameters'][$mPrefix].$addWhere, $this->oaiConfiguration['date_indexed_field'], $direction, $arr);
         $arrResult['hits'] = $res->getFoundCount();
 
-        if (0 === $arrResult['hits']) {
-            if ('GetRecord' === $arr['verb']) {
-                throw new OaiException(sprintf('Id %s does not exist. Bad argument: identifier: %s', $identifier, $identifier), 1478853965);
-            }
+        if (0 === $arrResult['hits'] && 'GetRecord' === $arr['verb']) {
+            throw new OaiException(sprintf('Id %s does not exist. Bad argument: identifier: %s', $identifier, $identifier), 1_478_853_965);
         }
 
         for ($i = 0, $iMax = min($arrResult['hits'], $arr['maxresults'], count($res->getDocuments())); $i < $iMax; ++$i) {
@@ -596,10 +551,8 @@ class OaiService implements OaiServiceInterface
             $arrResult['header'][$i]['datestamp'] = $document->getMetadata()['date_indexed'];
 
             foreach ($document->getClassification() as $setSpec) {
-                if ($setSpec) {
-                    if (isset($this->oaiConfiguration['sets']['dc_'.strtolower($setSpec)])) {
-                        $arrResult['header'][$i]['setSpec'][] = 'dc_'.$setSpec;
-                    }
+                if ($setSpec && isset($this->oaiConfiguration['sets']['dc_'.strtolower($setSpec)])) {
+                    $arrResult['header'][$i]['setSpec'][] = 'dc_'.$setSpec;
                 }
             }
             if (array_key_exists('setSpec', $arrResult['header'][$i]) && isset($arr['set']) && !in_array($arr['set'], $arrResult['header'][$i]['setSpec']) && isset($arrResult['header'][$i]['setSpec'])) {
@@ -641,11 +594,9 @@ class OaiService implements OaiServiceInterface
                         // dc:source Publisher: Titel. Ort Erscheinungsjahr.
                         if (2 === count($document->getParents())) {
                             $arrResult['metadata'][$i]['dc:source'][0] = implode('; ', $document->getPublisher()).': '.$document->getTitle()[0].'. '.implode('; ', $document->getPublishingPlaces()).' '.$document->getPublishingYear();
-                        } else {
-                            if (count($document->getParents()) > 2) {
-                                // dc:source Autor: Zeitschrift. Band Erscheinungsjahr.
-                                $arrResult['metadata'][$i]['dc:source'][0] = trim(implode('; ', $document->getAuthors()).': '.$document->getTitle()[0].'. '.$document->getPublishingYear());
-                            }
+                        } elseif (count($document->getParents()) > 2) {
+                            // dc:source Autor: Zeitschrift. Band Erscheinungsjahr.
+                            $arrResult['metadata'][$i]['dc:source'][0] = trim(implode('; ', $document->getAuthors()).': '.$document->getTitle()[0].'. '.$document->getPublishingYear());
                         }
                         break;
                     case 'mets':
@@ -717,11 +668,7 @@ class OaiService implements OaiServiceInterface
                         if (is_array($_v)) {
                             $_v = implode(' ', $_v);
                         }
-                        if ('dc:description' === $elementName) {
-                            $data = $this->oai->createCDATASection($_v);
-                        } else {
-                            $data = new \DOMText((string) $_v);
-                        }
+                        $data = 'dc:description' === $elementName ? $this->oai->createCDATASection($_v) : new \DOMText((string) $_v);
                         $node = $this->oai->createElement($elementName);
                         $node->appendChild($data);
                         $this->oai_dc->appendChild($node);
@@ -768,37 +715,33 @@ class OaiService implements OaiServiceInterface
         //same argument
         if ($this->requestStack->getMasterRequest()->isMethod(Request::METHOD_GET)) {
             $requestQuery = $this->requestStack->getMasterRequest()->getQueryString() ?: '';
+        } elseif ($this->requestStack->getMasterRequest()->isMethod(Request::METHOD_POST)) {
+            $requestQuery = file_get_contents('php://input');
         } else {
-            if ($this->requestStack->getMasterRequest()->isMethod(Request::METHOD_POST)) {
-                $requestQuery = file_get_contents('php://input');
-            } else {
-                $requestQuery = '';
-            }
+            $requestQuery = '';
         }
 
         $attributeCounter = $this->requestStack->getMasterRequest()->query->count();
         $requestQueryElements = explode('&', $requestQuery);
-        if (isset($requestQueryElements) && count($requestQueryElements) > 1) {
-            if (count($requestQueryElements) !== $attributeCounter) {
-                foreach ($GLOBALS['_'.$_SERVER['REQUEST_METHOD']] as $key => $val) {
-                    $arrKey = array_search($key.'='.$val, $requestQueryElements);
-                    if (false !== $arrKey) {
-                        unset($requestQueryElements[$arrKey]);
-                    }
+        if (isset($requestQueryElements) && count($requestQueryElements) > 1 && count($requestQueryElements) !== $attributeCounter) {
+            foreach ($GLOBALS['_'.$_SERVER['REQUEST_METHOD']] as $key => $val) {
+                $arrKey = array_search($key.'='.$val, $requestQueryElements);
+                if (false !== $arrKey) {
+                    unset($requestQueryElements[$arrKey]);
                 }
-                foreach ($requestQueryElements as $val) {
-                    $_arrTmp = explode('=', $val);
-                    $errors[$_arrTmp[0]] = $_arrTmp[1];
-                    throw new OaiException(sprintf('Bad argument %s', $errors), 1478853319);
-                }
+            }
+            foreach ($requestQueryElements as $val) {
+                $_arrTmp = explode('=', $val);
+                $errors[$_arrTmp[0]] = $_arrTmp[1];
+                throw new OaiException(sprintf('Bad argument %s', $errors), 1_478_853_319);
             }
         }
         if (!isset($requestArguments['verb'])) {
             $requestArguments['verb'] = 'ListMetadataFormats';
         }
         //No verb
-        if (0 === count($requestArguments) || !isset($requestArguments['verb'])) {
-            throw new OaiException(sprintf('Bad verb NOVERB: %s', ''), 1478853352);
+        if ([] === $requestArguments || !isset($requestArguments['verb'])) {
+            throw new OaiException(sprintf('Bad verb NOVERB: %s', ''), 1_478_853_352);
         }
 
         //resumptionToken is an exclusive argument, so get all necessary args from token
@@ -807,13 +750,13 @@ class OaiService implements OaiServiceInterface
             if ((2 === count($requestArguments) && !isset($requestArguments['verb'])) || count($requestArguments) > 2) {
                 $requestQueryElements = $requestArguments;
                 unset($requestQueryElements['resumptionToken']);
-                throw new OaiException(sprintf('Bad argument %s', $requestQueryElements), 1478853579);
+                throw new OaiException(sprintf('Bad argument %s', $requestQueryElements), 1_478_853_579);
             }
             $this->restoreArgs($requestArguments);
         }
         if (isset($requestArguments['verb'])) {
             if (!array_key_exists($requestArguments['verb'], $this->oaiConfiguration['verbs'])) {
-                throw new OaiException(sprintf('Bad verb %s: $s', $requestArguments['verb'], ''), 1478853608);
+                throw new OaiException(sprintf('Bad verb %s: $s', $requestArguments['verb'], ''), 1_478_853_608);
             }
 
             return $requestArguments;
@@ -871,7 +814,7 @@ class OaiService implements OaiServiceInterface
             $requestArguments = array_merge($requestArguments, $arrToken);
             unset($requestArguments['resumptionToken']);
         } catch (FileNotFoundException $e) {
-            throw new OaiException(sprintf('Bad Resumption Token %s.', $requestArguments['resumptionToken']), 1478853790);
+            throw new OaiException(sprintf('Bad Resumption Token %s.', $requestArguments['resumptionToken']), 1_478_853_790);
         }
 
         return true;

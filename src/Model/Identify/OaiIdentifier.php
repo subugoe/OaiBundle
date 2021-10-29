@@ -7,50 +7,43 @@ use JMS\Serializer\Annotation as Serializer;
 class OaiIdentifier
 {
     /**
-     * @var string
      * @Serializer\XmlElement(cdata=false)
      */
-    private $delimiter;
+    private ?string $delimiter = null;
 
     /**
-     * @var string
      * @Serializer\SerializedName("xmlns")
      * @Serializer\XmlAttribute
      */
-    private $namespace;
+    private ?string $namespace = null;
 
     /**
-     * @var string
      * @Serializer\XmlElement(cdata=false)
      * @Serializer\SerializedName("repositoryIdentifier")
      */
-    private $repositoryIdentifier;
+    private ?string $repositoryIdentifier = null;
 
     /**
-     * @var string
      * @Serializer\XmlElement(cdata=false)
      * @Serializer\SerializedName("sampleIdentifier")
      */
-    private $sampleIdentifier;
+    private ?string $sampleIdentifier = null;
 
     /**
-     * @var string
      * @Serializer\SerializedName("xsi:schemaLocation")
      * @Serializer\XmlAttribute
      */
-    private $schemaLocation;
+    private ?string $schemaLocation = null;
     /**
-     * @var string
      * @Serializer\XmlElement(cdata=false)
      */
-    private $scheme;
+    private ?string $scheme = null;
 
     /**
-     * @var string
      * @Serializer\SerializedName("xmlns:xsi")
      * @Serializer\XmlAttribute
      */
-    private $xsi;
+    private ?string $xsi = null;
 
     public function getDelimiter(): string
     {

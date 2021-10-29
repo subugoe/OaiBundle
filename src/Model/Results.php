@@ -10,10 +10,7 @@ class Results
      * @var array
      */
     private $documents = [];
-    /**
-     * @var int
-     */
-    private $foundCount = 0;
+    private int $foundCount = 0;
 
     public function addDocument(Document $document)
     {

@@ -7,23 +7,20 @@ use JMS\Serializer\Annotation as Serializer;
 class MetadataFormat
 {
     /**
-     * @var string
      * @Serializer\SerializedName("metadataNamespace")
      * @Serializer\XmlElement(cdata=false)
      */
-    private $namespace;
+    private ?string $namespace = null;
     /**
-     * @var string
      * @Serializer\SerializedName("metadataPrefix")
      * @Serializer\XmlElement(cdata=false)
      */
-    private $prefix;
+    private ?string $prefix = null;
 
     /**
-     * @var string
      * @Serializer\XmlElement(cdata=false)
      */
-    private $schema;
+    private ?string $schema = null;
 
     public function getNamespace(): string
     {

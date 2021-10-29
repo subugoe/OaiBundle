@@ -10,30 +10,26 @@ use JMS\Serializer\Annotation as Serializer;
 class Collection
 {
     /**
-     * @var string
      * @Serializer\Expose()
      */
-    private $description;
+    private ?string $description = null;
 
     /**
-     * @var string
      * @Serializer\Expose()
      * @Serializer\SerializedName("setSpec")
      * @Serializer\XmlElement(cdata=false)
      */
-    private $id;
+    private ?string $id = null;
 
     /**
-     * @var string
      * @Serializer\Expose()
      */
-    private $image;
+    private ?string $image = null;
     /**
-     * @var string
      * @Serializer\Expose()
      * @Serializer\SerializedName("setName")
      */
-    private $label;
+    private ?string $label = null;
 
     public function getDescription(): string
     {

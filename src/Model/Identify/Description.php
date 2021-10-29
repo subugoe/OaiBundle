@@ -4,10 +4,7 @@ namespace Subugoe\OaiBundle\Model\Identify;
 
 class Description
 {
-    /**
-     * @var OaiIdentifier
-     */
-    private $oaiIdentifier;
+    private ?\Subugoe\OaiBundle\Model\Identify\OaiIdentifier $oaiIdentifier = null;
 
     public function getOaiIdentifier(): OaiIdentifier
     {
