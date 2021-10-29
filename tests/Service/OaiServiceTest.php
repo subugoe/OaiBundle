@@ -1,6 +1,6 @@
 <?php
 
-namespace Subugoe\OaiBundle\Tests\Service;
+namespace tests\Service;
 
 use PHPUnit\Framework\TestCase;
 use Subugoe\OaiBundle\Service\OaiService;

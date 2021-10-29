@@ -11,7 +11,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "Subugoe\\OaiBundle\\": ""
+            "Subugoe\\OaiBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "tests\\": "tests/"
         }
     },
     "require": {
