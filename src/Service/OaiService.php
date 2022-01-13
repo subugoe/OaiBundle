@@ -45,21 +45,10 @@ class OaiService implements OaiServiceInterface
     private ?\Symfony\Component\HttpFoundation\RequestStack $requestStack = null;
 
     /**
-     * @var \Symfony\Contracts\Translation\TranslatorInterface
-     */
-    private $translation;
-
-    private \Subugoe\IIIFBundle\Translator\TranslatorInterface $translator;
-
-    /**
      * OaiService constructor.
      */
-    public function __construct(
-        TranslatorInterface $translator,
-        \Symfony\Contracts\Translation\TranslatorInterface $translation
-    ) {
-        $this->translator = $translator;
-        $this->translation = $translation;
+    public function __construct(private TranslatorInterface $translator, private \Symfony\Contracts\Translation\TranslatorInterface $translation)
+    {
     }
 
     public function deleteExpiredResumptionTokens(): void
@@ -335,7 +324,7 @@ class OaiService implements OaiServiceInterface
                 reset($requiredArguments);
             }
         }
-        if (count($requiredArguments) > 0) {
+        if ([] !== $requiredArguments) {
             $noerror = false;
             foreach ($requiredArguments as $requiredArgument) {
                 throw new OaiException(sprintf('Bad argument: %s: %s', $requiredArgument, ''), 1_478_853_229);
@@ -791,7 +780,7 @@ class OaiService implements OaiServiceInterface
         foreach ($solrResults->getDocuments() as $solrDocument) {
             try {
                 $document = $this->translator->getDocumentById($solrDocument['id']);
-            } catch (\Throwable $t) {
+            } catch (\Throwable) {
                 continue;
             }
             $document->addMetadata('date_indexed', $solrDocument['date_indexed']);
@@ -813,7 +802,7 @@ class OaiService implements OaiServiceInterface
             parse_str($strToken, $arrToken);
             $requestArguments = array_merge($requestArguments, $arrToken);
             unset($requestArguments['resumptionToken']);
-        } catch (FileNotFoundException $e) {
+        } catch (FileNotFoundException) {
             throw new OaiException(sprintf('Bad Resumption Token %s.', $requestArguments['resumptionToken']), 1_478_853_790);
         }
 

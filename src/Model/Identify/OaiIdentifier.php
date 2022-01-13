@@ -80,9 +80,6 @@ class OaiIdentifier
         return $this->xsi;
     }
 
-    /**
-     * @return OaiIdentifier
-     */
     public function setDelimiter(string $delimiter): self
     {
         $this->delimiter = $delimiter;
@@ -90,9 +87,6 @@ class OaiIdentifier
         return $this;
     }
 
-    /**
-     * @return OaiIdentifier
-     */
     public function setNamespace(string $namespace): self
     {
         $this->namespace = $namespace;
@@ -100,9 +94,6 @@ class OaiIdentifier
         return $this;
     }
 
-    /**
-     * @return OaiIdentifier
-     */
     public function setRepositoryIdentifier(string $repositoryIdentifier): self
     {
         $this->repositoryIdentifier = $repositoryIdentifier;
@@ -110,9 +101,6 @@ class OaiIdentifier
         return $this;
     }
 
-    /**
-     * @return OaiIdentifier
-     */
     public function setSampleIdentifier(string $sampleIdentifier): self
     {
         $this->sampleIdentifier = $sampleIdentifier;
@@ -120,9 +108,6 @@ class OaiIdentifier
         return $this;
     }
 
-    /**
-     * @return OaiIdentifier
-     */
     public function setSchemaLocation(string $schemaLocation): self
     {
         $this->schemaLocation = $schemaLocation;
@@ -130,9 +115,6 @@ class OaiIdentifier
         return $this;
     }
 
-    /**
-     * @return OaiIdentifier
-     */
     public function setScheme(string $scheme): self
     {
         $this->scheme = $scheme;
@@ -140,9 +122,6 @@ class OaiIdentifier
         return $this;
     }
 
-    /**
-     * @return OaiIdentifier
-     */
     public function setXsi(string $xsi): self
     {
         $this->xsi = $xsi;

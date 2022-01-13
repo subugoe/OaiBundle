@@ -16,7 +16,6 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     ]);
 
     $containerConfigurator->import(SetList::CODE_QUALITY);
-    $containerConfigurator->import(SetList::PHP_74);
-    $containerConfigurator->import(SymfonySetList::SYMFONY_50_TYPES);
-    $containerConfigurator->import(SymfonySetList::SYMFONY_52);
+    $containerConfigurator->import(SetList::PHP_80);
+    $containerConfigurator->import(SymfonySetList::SYMFONY_54);
 };

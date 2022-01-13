@@ -37,9 +37,6 @@ class MetadataFormat
         return $this->schema;
     }
 
-    /**
-     * @return MetadataFormat
-     */
     public function setNamespace(string $namespace): self
     {
         $this->namespace = $namespace;
@@ -47,9 +44,6 @@ class MetadataFormat
         return $this;
     }
 
-    /**
-     * @return MetadataFormat
-     */
     public function setPrefix(string $prefix): self
     {
         $this->prefix = $prefix;
@@ -57,9 +51,6 @@ class MetadataFormat
         return $this;
     }
 
-    /**
-     * @return MetadataFormat
-     */
     public function setSchema(string $schema): self
     {
         $this->schema = $schema;
