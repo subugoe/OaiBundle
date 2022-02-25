@@ -194,7 +194,7 @@ class OaiService implements OaiServiceInterface
 
         $this->createRootElement();
 
-        $requestArguments = $this->parseArguments($this->requestStack->getMasterRequest()->query->all());
+        $requestArguments = $this->parseArguments($this->requestStack->getMainRequest()->query->all());
 
         //if isset requestArguments['start'] no more checks!
         if (!isset($requestArguments['start']) && isset($requestArguments['verb'])) {
@@ -702,15 +702,15 @@ class OaiService implements OaiServiceInterface
         $this->oai_pmh->appendChild($this->request);
 
         //same argument
-        if ($this->requestStack->getMasterRequest()->isMethod(Request::METHOD_GET)) {
-            $requestQuery = $this->requestStack->getMasterRequest()->getQueryString() ?: '';
-        } elseif ($this->requestStack->getMasterRequest()->isMethod(Request::METHOD_POST)) {
+        if ($this->requestStack->getMainRequest()->isMethod(Request::METHOD_GET)) {
+            $requestQuery = $this->requestStack->getMainRequest()->getQueryString() ?: '';
+        } elseif ($this->requestStack->getMainRequest()->isMethod(Request::METHOD_POST)) {
             $requestQuery = file_get_contents('php://input');
         } else {
             $requestQuery = '';
         }
 
-        $attributeCounter = $this->requestStack->getMasterRequest()->query->count();
+        $attributeCounter = $this->requestStack->getMainRequest()->query->count();
         $requestQueryElements = explode('&', $requestQuery);
         if (isset($requestQueryElements) && count($requestQueryElements) > 1 && count($requestQueryElements) !== $attributeCounter) {
             foreach ($GLOBALS['_'.$_SERVER['REQUEST_METHOD']] as $key => $val) {
