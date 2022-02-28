@@ -38,7 +38,7 @@ class OaiService implements OaiServiceInterface
 
     private ?array $oaiConfiguration = null;
 
-    private ?\League\Flysystem\Filesystem $oaiTempDirectory = null;
+    private ?\League\Flysystem\FilesystemOperator $oaiTempDirectory = null;
 
     private ?\DOMElement $record = null;
 
@@ -169,9 +169,9 @@ class OaiService implements OaiServiceInterface
     }
 
     #[Required]
-    public function setFilesystem(FilesystemOperator $oaiTempFilesystem): void
+    public function setFilesystem(FilesystemOperator $oaitempFilesystem): void
     {
-        $this->oaiTempDirectory = $oaiTempFilesystem;
+        $this->oaiTempDirectory = $oaitempFilesystem;
     }
 
     public function setOaiConfiguration(array $config): void
