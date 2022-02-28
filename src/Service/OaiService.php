@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Subugoe\OaiBundle\Service;
 
 use League\Flysystem\FileNotFoundException;
-use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemOperator;
 use Solarium\Client;
 use Subugoe\IIIFBundle\Translator\TranslatorInterface;
