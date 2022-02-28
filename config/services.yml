@@ -13,9 +13,6 @@ services:
       - method: setClient
         arguments:
           - '@solarium.client'
-      - method: setFilesystem
-        arguments:
-          - '@oaitemp_filesystem'
       - method: setOaiConfiguration
         arguments:
           - '%subugoe_oai%'

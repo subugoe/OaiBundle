@@ -6,6 +6,7 @@ namespace Subugoe\OaiBundle\Service;
 
 use League\Flysystem\FileNotFoundException;
 use League\Flysystem\Filesystem;
+use League\Flysystem\FilesystemOperator;
 use Solarium\Client;
 use Subugoe\IIIFBundle\Translator\TranslatorInterface;
 use Subugoe\IIIFModel\Model\Document;
@@ -21,6 +22,7 @@ use Subugoe\OaiBundle\Model\Results;
 use Subugoe\OaiBundle\Model\Sets;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\Service\Attribute\Required;
 
 class OaiService implements OaiServiceInterface
 {
@@ -166,9 +168,10 @@ class OaiService implements OaiServiceInterface
         $this->client = $client;
     }
 
-    public function setFilesystem(Filesystem $filesystem): void
+    #[Required]
+    public function setFilesystem(FilesystemOperator $oaiTempFilesystem): void
     {
-        $this->oaiTempDirectory = $filesystem;
+        $this->oaiTempDirectory = $oaiTempFilesystem;
     }
 
     public function setOaiConfiguration(array $config): void
