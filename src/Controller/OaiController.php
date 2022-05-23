@@ -18,7 +18,7 @@ class OaiController extends AbstractController
     }
 
     #[Route(path: '/oai2/verb/Identify')]
-    public function identify(Request $request)
+    public function identify(Request $request): Response
     {
         $url = $request->getSchemeAndHttpHost().$request->getPathInfo();
         $oaiConfiguration = $this->getParameter('oai');
@@ -52,7 +52,7 @@ class OaiController extends AbstractController
     }
 
     #[Route(path: '/oai2/verb/ListMetadataFormats')]
-    public function listMetadataFormats(Request $request)
+    public function listMetadataFormats(Request $request): Response
     {
         $url = $request->getSchemeAndHttpHost().$request->getPathInfo();
         $oaiConfiguration = $this->getParameter('oai');
@@ -65,7 +65,7 @@ class OaiController extends AbstractController
     }
 
     #[Route(path: '/oai2/verb/ListSets')]
-    public function listSets(Request $request)
+    public function listSets(Request $request): Response
     {
         $url = $request->getSchemeAndHttpHost().$request->getPathInfo();
         $collections = $this->getParameter('collections');

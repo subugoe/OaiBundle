@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Subugoe\OaiBundle\Service;
 
-use League\Flysystem\FileNotFoundException;
+use League\Flysystem\FilesystemException;
 use League\Flysystem\FilesystemOperator;
 use Solarium\Client;
 use Subugoe\IIIFBundle\Translator\TranslatorInterface;
@@ -52,6 +52,9 @@ class OaiService implements OaiServiceInterface
     {
     }
 
+    /**
+     * @throws FilesystemException
+     */
     public function deleteExpiredResumptionTokens(): void
     {
         $time = time() - 259200;
@@ -63,13 +66,13 @@ class OaiService implements OaiServiceInterface
         }
     }
 
-    public function getIdentify(string $url, array $oaiConfiguraion): Identify
+    public function getIdentify(string $url, array $oaiConfiguration): Identify
     {
         $identify = new Identify();
         $identification = new Identification();
         $description = new Description();
         $oaiIdentifier = new OaiIdentifier();
-        $oaiIdentifierTags = $oaiConfiguraion['oai_identifier'];
+        $oaiIdentifierTags = $oaiConfiguration['oai_identifier'];
 
         $oaiIdentifier
             ->setNamespace($oaiIdentifierTags['xmlns'])
@@ -81,7 +84,7 @@ class OaiService implements OaiServiceInterface
             ->setSampleIdentifier($oaiIdentifierTags['sample_identifier']);
 
         $description->setOaiIdentifier($oaiIdentifier);
-        $identificationTags = $oaiConfiguraion['identification_tags'];
+        $identificationTags = $oaiConfiguration['identification_tags'];
         $oaiRequest = (new \Subugoe\OaiBundle\Model\Request())
             ->setUrl($url)
             ->setVerb('Identify');
@@ -236,6 +239,9 @@ class OaiService implements OaiServiceInterface
         }
     }
 
+    /**
+     * @throws \DOMException
+     */
     private function createRootElement()
     {
         $this->oai_pmh = $this->oai->createElement('OAI-PMH');
@@ -254,7 +260,7 @@ class OaiService implements OaiServiceInterface
     /**
      * @throws OaiException
      */
-    private function errorAllowedArguments(string $verb, array $requestArguments)
+    private function errorAllowedArguments(string $verb, array $requestArguments): void
     {
         foreach ($requestArguments as $key => $val) {
             if ('verb' !== $key && !@in_array($key, explode(',', $this->oaiConfiguration['verbs'][$verb]['allowedArguments']))) {
@@ -266,7 +272,7 @@ class OaiService implements OaiServiceInterface
     /**
      * @throws OaiException
      */
-    private function errorDate(array &$requestArguments)
+    private function errorDate(array &$requestArguments): void
     {
         $arrDates = ['from' => '00:00:00', 'until' => '23:59:59'];
         foreach ($arrDates as $key => $val) {
@@ -341,7 +347,7 @@ class OaiService implements OaiServiceInterface
     /**
      * @param $requestArguments
      *
-     * @throws OaiException
+     * @throws OaiException|\DOMException
      */
     private function getListRecordsAndListIdentifiers($requestArguments): void
     {
@@ -470,7 +476,7 @@ class OaiService implements OaiServiceInterface
     /**
      * @return array $arrResult
      *
-     * @throws OaiException
+     * @throws OaiException|FilesystemException
      */
     private function getRecords(array &$arr): array
     {
@@ -600,7 +606,7 @@ class OaiService implements OaiServiceInterface
         // new ResumtionToken ?
         if ('ListRecords' === $arr['verb'] || 'ListIdentifiers' === $arr['verb']) {
             if (($arrResult['hits'] - $arr['start']) >= $arr['maxresults']) {
-                $arrResult['token'] = 'oai_'.md5(uniqid((string) rand(), true));
+                $arrResult['token'] = 'oai_'.md5(uniqid((string) mt_rand(), true));
                 $strToken = '';
                 // allowed keys
                 $arrAllowed = ['from', 'until', 'metadataPrefix', 'set', 'resumptionToken', 'start'];
@@ -620,6 +626,9 @@ class OaiService implements OaiServiceInterface
         return $arrResult;
     }
 
+    /**
+     * @throws \DOMException
+     */
     private function getResumptionToken(array $result, array $requestArguments): \DOMElement
     {
         $token = $result['token'] ?? '';
@@ -670,7 +679,6 @@ class OaiService implements OaiServiceInterface
     }
 
     /**
-     * @throws FileNotFoundException
      * @throws OaiException
      */
     private function parseArguments(array $requestArguments): array
@@ -690,7 +698,7 @@ class OaiService implements OaiServiceInterface
                         continue;
                     }
                 }
-                if (in_array($key, $this->oaiConfiguration['request_attributes'])) {
+                if (in_array($key, $this->oaiConfiguration['request_attributes'], true)) {
                     if ('verb' === $key && !array_key_exists($val, $this->oaiConfiguration['verbs'])) {
                         continue;
                     }
@@ -747,7 +755,7 @@ class OaiService implements OaiServiceInterface
         }
         if (isset($requestArguments['verb'])) {
             if (!array_key_exists($requestArguments['verb'], $this->oaiConfiguration['verbs'])) {
-                throw new OaiException(sprintf('Bad verb %s: $s', $requestArguments['verb'], ''), 1_478_853_608);
+                throw new OaiException(sprintf('Bad verb %s: %s', $requestArguments['verb'], ''), 1_478_853_608);
             }
 
             return $requestArguments;
@@ -794,17 +802,16 @@ class OaiService implements OaiServiceInterface
 
     /**
      * @throws OaiException
-     * @throws FileNotFoundException
      */
     private function restoreArgs(array &$requestArguments): bool
     {
-        $strToken = $this->oaiTempDirectory->read('/oai-gdz/'.$requestArguments['resumptionToken']);
-
         try {
+            $strToken = $this->oaiTempDirectory->read('/oai-gdz/'.$requestArguments['resumptionToken']);
+
             parse_str($strToken, $arrToken);
             $requestArguments = array_merge($requestArguments, $arrToken);
             unset($requestArguments['resumptionToken']);
-        } catch (FileNotFoundException) {
+        } catch (FilesystemException) {
             throw new OaiException(sprintf('Bad Resumption Token %s.', $requestArguments['resumptionToken']), 1_478_853_790);
         }
 
