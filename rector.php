@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-use Rector\Core\Configuration\Option;
+use Rector\Config\RectorConfig;
 use Rector\Set\ValueObject\SetList;
 use Rector\Symfony\Set\SymfonySetList;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
-return static function (ContainerConfigurator $containerConfigurator): void {
-    $parameters = $containerConfigurator->parameters();
-    $parameters->set(Option::PATHS, [
+return static function (RectorConfig $rectorConfig): void {
+    $rectorConfig->paths([
         __DIR__.'/src',
-        __DIR__.'/public',
+        __DIR__.'/tests',
         __DIR__.'/*.php',
     ]);
 
-    $containerConfigurator->import(SetList::CODE_QUALITY);
-    $containerConfigurator->import(SetList::PHP_80);
-    $containerConfigurator->import(SymfonySetList::SYMFONY_54);
+    $rectorConfig->sets([
+        SetList::CODE_QUALITY,
+        SetList::PHP_80,
+        SymfonySetList::SYMFONY_54,
+    ]);
 };

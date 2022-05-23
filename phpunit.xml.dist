@@ -3,7 +3,7 @@
 <phpunit bootstrap="./vendor/autoload.php" colors="true">
     <testsuites>
         <testsuite name="Oai Bundle test suite">
-            <directory suffix="Test.php">./Tests</directory>
+            <directory suffix="Test.php">./tests</directory>
         </testsuite>
     </testsuites>
 
@@ -12,7 +12,6 @@
             <directory>./</directory>
             <exclude>
                 <directory>./Resources</directory>
-                <directory>./Tests</directory>
                 <directory>./vendor</directory>
             </exclude>
         </whitelist>

@@ -7,12 +7,9 @@ use Subugoe\OaiBundle\Service\OaiService;
 
 class OaiServiceTest extends TestCase
 {
-    /**
-     * @var OaiService
-     */
-    protected $fixture;
+    protected OaiService|\PHPUnit\Framework\MockObject\MockObject $fixture;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->fixture = $this
             ->getMockBuilder(OaiService::class)

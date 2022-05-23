@@ -188,17 +188,17 @@ class OaiService implements OaiServiceInterface
         // create XML-DOM
         $this->oai = new \DOMDocument('1.0', 'UTF-8');
 
-        //nice output format (linebreaks and tabs)
+        // nice output format (linebreaks and tabs)
         $this->oai->formatOutput = false;
 
-        //insert xsl
+        // insert xsl
         $this->oai->appendChild($this->oai->createProcessingInstruction('xml-stylesheet', 'href="/bundles/subugoeoai/xsl/oai2.xsl" type="text/xsl"'));
 
         $this->createRootElement();
 
         $requestArguments = $this->parseArguments($this->requestStack->getMainRequest()->query->all());
 
-        //if isset requestArguments['start'] no more checks!
+        // if isset requestArguments['start'] no more checks!
         if (!isset($requestArguments['start']) && isset($requestArguments['verb'])) {
             if (isset($this->oaiConfiguration['metadata_format_options'][$requestArguments['verb']]['requiredArguments'])) {
                 $this->errorRequiredArguments($requestArguments['verb'], $requestArguments);
@@ -345,7 +345,7 @@ class OaiService implements OaiServiceInterface
      */
     private function getListRecordsAndListIdentifiers($requestArguments): void
     {
-        //error handling
+        // error handling
         $this->errorDate($requestArguments);
         $this->errorMetaDataPrefix($requestArguments);
         $this->errorFromUntil($requestArguments);
@@ -581,7 +581,7 @@ class OaiService implements OaiServiceInterface
                                 $arrResult['metadata'][$i]['dc:identifier'][] = trim($this->oaiConfiguration['metadata_format_options']['oai_dc']['identifier'][$key]).' '.trim($val);
                             }
                         }
-                        //Zeitschriftenband
+                        // Zeitschriftenband
                         // dc:source Publisher: Titel. Ort Erscheinungsjahr.
                         if (2 === count($document->getParents())) {
                             $arrResult['metadata'][$i]['dc:source'][0] = implode('; ', $document->getPublisher()).': '.$document->getTitle()[0].'. '.implode('; ', $document->getPublishingPlaces()).' '.$document->getPublishingYear();
@@ -597,12 +597,12 @@ class OaiService implements OaiServiceInterface
                 }
             }
         }
-        //new ResumtionToken ?
+        // new ResumtionToken ?
         if ('ListRecords' === $arr['verb'] || 'ListIdentifiers' === $arr['verb']) {
             if (($arrResult['hits'] - $arr['start']) >= $arr['maxresults']) {
                 $arrResult['token'] = 'oai_'.md5(uniqid((string) rand(), true));
                 $strToken = '';
-                //allowed keys
+                // allowed keys
                 $arrAllowed = ['from', 'until', 'metadataPrefix', 'set', 'resumptionToken', 'start'];
                 foreach ($arr as $key => $val) {
                     if (in_array($key, $arrAllowed)) {
@@ -678,7 +678,7 @@ class OaiService implements OaiServiceInterface
         $errors = [];
         unset($requestArguments['id']);
 
-        //prepare answer
+        // prepare answer
         if (is_array($requestArguments)) {
             foreach ($requestArguments as $key => $val) {
                 if ('from' === $key || 'until' === $key) {
@@ -703,7 +703,7 @@ class OaiService implements OaiServiceInterface
         }
         $this->oai_pmh->appendChild($this->request);
 
-        //same argument
+        // same argument
         if ($this->requestStack->getMainRequest()->isMethod(Request::METHOD_GET)) {
             $requestQuery = $this->requestStack->getMainRequest()->getQueryString() ?: '';
         } elseif ($this->requestStack->getMainRequest()->isMethod(Request::METHOD_POST)) {
@@ -730,13 +730,13 @@ class OaiService implements OaiServiceInterface
         if (!isset($requestArguments['verb'])) {
             $requestArguments['verb'] = 'ListMetadataFormats';
         }
-        //No verb
+        // No verb
         if ([] === $requestArguments || !isset($requestArguments['verb'])) {
             throw new OaiException(sprintf('Bad verb NOVERB: %s', ''), 1_478_853_352);
         }
 
-        //resumptionToken is an exclusive argument, so get all necessary args from token
-        //or stop all other action
+        // resumptionToken is an exclusive argument, so get all necessary args from token
+        // or stop all other action
         if (is_array($requestArguments) && isset($requestArguments['resumptionToken'])) {
             if ((2 === count($requestArguments) && !isset($requestArguments['verb'])) || count($requestArguments) > 2) {
                 $requestQueryElements = $requestArguments;
