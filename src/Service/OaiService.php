@@ -10,15 +10,15 @@ use Solarium\Client;
 use Subugoe\IIIFBundle\Translator\TranslatorInterface;
 use Subugoe\IIIFModel\Model\Document;
 use Subugoe\OaiBundle\Exception\OaiException;
-use Subugoe\OaiBundle\Model\Collection;
-use Subugoe\OaiBundle\Model\Identify\Description;
-use Subugoe\OaiBundle\Model\Identify\Identification;
-use Subugoe\OaiBundle\Model\Identify\Identify;
-use Subugoe\OaiBundle\Model\Identify\OaiIdentifier;
-use Subugoe\OaiBundle\Model\MetadataFormat;
-use Subugoe\OaiBundle\Model\MetadataFormats;
-use Subugoe\OaiBundle\Model\Results;
-use Subugoe\OaiBundle\Model\Sets;
+use Subugoe\OaiModel\Model\Collection;
+use Subugoe\OaiModel\Model\Identify\Description;
+use Subugoe\OaiModel\Model\Identify\Identification;
+use Subugoe\OaiModel\Model\Identify\Identify;
+use Subugoe\OaiModel\Model\Identify\OaiIdentifier;
+use Subugoe\OaiModel\Model\MetadataFormat;
+use Subugoe\OaiModel\Model\MetadataFormats;
+use Subugoe\OaiModel\Model\Results;
+use Subugoe\OaiModel\Model\Sets;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Service\Attribute\Required;
@@ -85,7 +85,7 @@ class OaiService implements OaiServiceInterface
 
         $description->setOaiIdentifier($oaiIdentifier);
         $identificationTags = $oaiConfiguration['identification_tags'];
-        $oaiRequest = (new \Subugoe\OaiBundle\Model\Request())
+        $oaiRequest = (new \Subugoe\OaiModel\Model\Request())
             ->setUrl($url)
             ->setVerb('Identify');
         $identify
@@ -109,7 +109,7 @@ class OaiService implements OaiServiceInterface
     public function getListSets(string $url, array $collections): Sets
     {
         $sets = new Sets();
-        $oaiRequest = (new \Subugoe\OaiBundle\Model\Request())
+        $oaiRequest = (new \Subugoe\OaiModel\Model\Request())
             ->setUrl($url)
             ->setVerb('ListSets');
 
@@ -132,7 +132,7 @@ class OaiService implements OaiServiceInterface
     public function getMetadataFormats(string $url, array $oaiConfiguraion, ?string $identifer): MetadataFormats
     {
         $metadataFormats = new MetadataFormats();
-        $oaiRequest = (new \Subugoe\OaiBundle\Model\Request())
+        $oaiRequest = (new \Subugoe\OaiModel\Model\Request())
             ->setUrl($url)
             ->setVerb('ListMetadataFormats');
 
@@ -561,7 +561,7 @@ class OaiService implements OaiServiceInterface
             if ('ListRecords' === $arr['verb'] || 'GetRecord' === $arr['verb']) {
                 switch ($arr['metadataPrefix']) {
                     case 'oai_dc':
-                        if (count($document->getParents()) > 0) {
+                        if ([] !== $document->getParents()) {
                             $arrResult['metadata'][$i]['dc:relation'][0] = $document->getParents()[0]->getId();
                         }
                         $arrResult['metadata'][$i]['dc:title'][0] = $document->getTitle()[0];

@@ -3,9 +3,9 @@
 namespace Subugoe\OaiBundle\Service;
 
 use Subugoe\OaiBundle\Exception\OaiException;
-use Subugoe\OaiBundle\Model\Identify\Identify;
-use Subugoe\OaiBundle\Model\MetadataFormats;
-use Subugoe\OaiBundle\Model\Sets;
+use Subugoe\OaiModel\Model\Identify\Identify;
+use Subugoe\OaiModel\Model\MetadataFormats;
+use Subugoe\OaiModel\Model\Sets;
 
 interface OaiServiceInterface
 {

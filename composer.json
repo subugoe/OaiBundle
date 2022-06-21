@@ -1,35 +1,42 @@
 {
-    "name": "subugoe/oai-bundle",
-    "description": "OAI Service",
-    "type": "symfony-bundle",
-    "license": "AGPL-3.0-only",
-    "authors": [
-        {
-            "name": "Ingo Pfennigstorf",
-            "email": "pfennigstorf@sub.uni-goettingen.de"
-        }
-    ],
-    "autoload": {
-        "psr-4": {
-            "Subugoe\\OaiBundle\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "tests\\": "tests/"
-        }
-    },
-    "require": {
-        "php": "^8.0",
-        "league/flysystem": "^2.0 || ^3.0.10",
-        "symfony/framework-bundle": "^5.0 || ^6.0",
-        "ext-dom": "*",
-        "symfony/translation-contracts": "^3.0",
-        "jms/serializer": "^3.17"
-    },
-    "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.0",
-        "rector/rector": "^0.13",
-        "phpunit/phpunit": "^9.5"
+  "name": "subugoe/oai-bundle",
+  "description": "OAI Service",
+  "type": "symfony-bundle",
+  "license": "AGPL-3.0-only",
+  "authors": [
+    {
+      "name": "Ingo Pfennigstorf",
+      "email": "pfennigstorf@sub.uni-goettingen.de"
     }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Subugoe\\OaiBundle\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "tests\\": "tests/"
+    }
+  },
+  "require": {
+    "php": "^8.0",
+    "league/flysystem": "^2.0 || ^3.0.10",
+    "symfony/framework-bundle": "^5.0 || ^6.0",
+    "ext-dom": "*",
+    "symfony/translation-contracts": "^3.0",
+    "jms/serializer": "^3.17",
+    "subugoe/oai-model": "^0.0.1"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.0",
+    "rector/rector": "^0.13",
+    "phpunit/phpunit": "^9.5"
+  },
+  "scripts": {
+    "lint": [
+      "php-cs-fixer fix --dry-run",
+      "rector process --dry-run"
+    ]
+  }
 }
