@@ -295,11 +295,11 @@ class OaiService implements OaiServiceInterface
     private function errorFromUntil(array &$requestArguments): void
     {
         if (isset($requestArguments['from'], $requestArguments['until'])) {
-            if ((strlen($requestArguments['from'])) !== (strlen($requestArguments['until']))) {
+            if (strlen($requestArguments['from']) !== strlen($requestArguments['until'])) {
                 throw new OaiException(sprintf('Bad argument. from: %s until %s', $requestArguments['from'], $requestArguments['until']), 1_478_852_818);
             }
 
-            if (($requestArguments['from']) > ($requestArguments['until'])) {
+            if ($requestArguments['from'] > $requestArguments['until']) {
                 throw new OaiException(sprintf('Bad argument. from: %s until %s', $requestArguments['from'], $requestArguments['until']), 1_478_852_845);
             }
         }
@@ -345,8 +345,6 @@ class OaiService implements OaiServiceInterface
     }
 
     /**
-     * @param $requestArguments
-     *
      * @throws OaiException|\DOMException
      */
     private function getListRecordsAndListIdentifiers($requestArguments): void
@@ -394,8 +392,6 @@ class OaiService implements OaiServiceInterface
     }
 
     /**
-     * @param $requestArguments
-     *
      * @return mixed
      *
      * @throws OaiException
@@ -573,7 +569,7 @@ class OaiService implements OaiServiceInterface
                         $arrResult['metadata'][$i]['dc:date'][0] = $document->getPublishingYear();
                         try {
                             $arrResult['metadata'][$i]['dc:type'][0] = $this->oaiConfiguration['metadata_format_options']['oai_dc']['identifier'][$document->getType()];
-                        } catch (\ErrorException $errorException) {
+                        } catch (\ErrorException) {
                         }
                         $arrResult['metadata'][$i]['dc:type'][1] = $this->oaiConfiguration['metadata_format_options']['oai_dc']['default']['dc:type'];
                         $arrResult['metadata'][$i]['dc:format'][0] = 'image/jpeg';
@@ -637,7 +633,7 @@ class OaiService implements OaiServiceInterface
         $token = $result['token'] ?? '';
 
         $resumptionToken = $this->oai->createElement('resumptionToken', $token);
-        $resumptionToken->setAttribute('expirationDate', (gmdate('Y-m-d\TH:i:s\Z', (time() + $this->oaiConfiguration['expiration_date']))));
+        $resumptionToken->setAttribute('expirationDate', gmdate('Y-m-d\TH:i:s\Z', time() + $this->oaiConfiguration['expiration_date']));
         $resumptionToken->setAttribute('completeListSize', (string) $result['hits']);
         $resumptionToken->setAttribute('cursor', (string) $requestArguments['start']);
 
