@@ -571,7 +571,10 @@ class OaiService implements OaiServiceInterface
                         $arrResult['metadata'][$i]['dc:language'] = $document->getLanguage();
                         $arrResult['metadata'][$i]['dc:publisher'] = $document->getPublisher();
                         $arrResult['metadata'][$i]['dc:date'][0] = $document->getPublishingYear();
-                        $arrResult['metadata'][$i]['dc:type'][0] = $this->oaiConfiguration['metadata_format_options']['oai_dc']['identifier'][$document->getType()];
+                        try {
+                            $arrResult['metadata'][$i]['dc:type'][0] = $this->oaiConfiguration['metadata_format_options']['oai_dc']['identifier'][$document->getType()];
+                        } catch (\ErrorException $errorException) {
+                        }
                         $arrResult['metadata'][$i]['dc:type'][1] = $this->oaiConfiguration['metadata_format_options']['oai_dc']['default']['dc:type'];
                         $arrResult['metadata'][$i]['dc:format'][0] = 'image/jpeg';
                         $arrResult['metadata'][$i]['dc:format'][1] = 'application/pdf';
