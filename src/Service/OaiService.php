@@ -392,8 +392,6 @@ class OaiService implements OaiServiceInterface
     }
 
     /**
-     * @return mixed
-     *
      * @throws OaiException
      */
     private function getRecord($requestArguments)
@@ -772,11 +770,11 @@ class OaiService implements OaiServiceInterface
         $start = $configuration['start'] ?? 0;
         $direction = $reverse ? 'desc' : 'asc';
         $query .= ' -doctype:fulltext';
-        if (isset($configuration["set"])) {
-            if (strtolower($configuration["set"]) == "eu") {
+        if (isset($configuration['set'])) {
+            if ('eu' == strtolower($configuration['set'])) {
                 $query .= ' NOT(dc:(mathematica OR rusdml) AND year_publish:[1926 TO 9999])';
             } else {
-                $query .= ' dc:'.$configuration["set"];
+                $query .= ' dc:'.$configuration['set'];
             }
         }
 
