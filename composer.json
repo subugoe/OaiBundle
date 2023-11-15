@@ -33,7 +33,7 @@
     },
     "scripts": {
         "lint": [
-            "php-cs-fixer fix --dry-run",
+            "php-cs-fixer fix --dry-run -v",
             "rector process --dry-run"
         ]
     }
