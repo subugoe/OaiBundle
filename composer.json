@@ -18,7 +18,7 @@
         }
     },
     "require": {
-        "php": "^8.0",
+        "php": "^8.2",
         "league/flysystem": "^2.0 || ^3.0.10",
         "symfony/framework-bundle": "^5.0 || ^6.0",
         "ext-dom": "*",
