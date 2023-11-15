@@ -772,6 +772,13 @@ class OaiService implements OaiServiceInterface
         $start = $configuration['start'] ?? 0;
         $direction = $reverse ? 'desc' : 'asc';
         $query .= ' -doctype:fulltext';
+        if (isset($configuration["set"])) {
+            if (strtolower($configuration["set"]) == "eu") {
+                $query .= ' NOT(dc:(mathematica OR rusdml) AND year_publish:[1926 TO 9999])';
+            } else {
+                $query .= ' dc:'.$configuration["set"];
+            }
+        }
 
         $solrQuery = $this->client
             ->createSelect()
