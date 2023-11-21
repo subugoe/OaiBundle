@@ -213,7 +213,6 @@ class OaiService implements OaiServiceInterface
             if (isset($this->oaiConfiguration['metadata_format_options'][$requestArguments['verb']]['requiredArguments'])) {
                 $this->errorRequiredArguments($requestArguments['verb'], $requestArguments);
             }
-            $this->errorAllowedArguments($requestArguments['verb'], $requestArguments);
         }
 
         if ('GetRecord' === $requestArguments['verb']) {
