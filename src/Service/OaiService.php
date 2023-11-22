@@ -209,10 +209,8 @@ class OaiService implements OaiServiceInterface
             $this->errorAllowedArguments($requestArguments['verb'], $requestArguments);
         }
 
-        if (!isset($requestArguments['from']) && isset($requestArguments['until'])) {
-            if (isset($this->oaiConfiguration['metadata_format_options'][$requestArguments['verb']]['requiredArguments'])) {
+        if (!isset($requestArguments['from']) && isset($requestArguments['until']) && isset($this->oaiConfiguration['metadata_format_options'][$requestArguments['verb']]['requiredArguments'])) {
                 $this->errorRequiredArguments($requestArguments['verb'], $requestArguments);
-            }
         }
 
         if ('GetRecord' === $requestArguments['verb']) {
