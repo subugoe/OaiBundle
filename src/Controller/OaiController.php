@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class OaiController extends AbstractController
 {
-    public function __construct(private SerializerInterface $serializer, private OaiServiceInterface $oaiService)
+    public function __construct(private readonly SerializerInterface $serializer, private readonly OaiServiceInterface $oaiService)
     {
     }
 

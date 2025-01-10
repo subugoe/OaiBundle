@@ -48,7 +48,7 @@ class OaiService implements OaiServiceInterface
     /**
      * OaiService constructor.
      */
-    public function __construct(private TranslatorInterface $translator, private \Symfony\Contracts\Translation\TranslatorInterface $translation)
+    public function __construct(private readonly TranslatorInterface $translator, private readonly \Symfony\Contracts\Translation\TranslatorInterface $translation)
     {
     }
 
@@ -260,7 +260,7 @@ class OaiService implements OaiServiceInterface
     private function errorAllowedArguments(string $verb, array $requestArguments): void
     {
         foreach ($requestArguments as $key => $val) {
-            if ('verb' !== $key && !@in_array($key, explode(',', $this->oaiConfiguration['verbs'][$verb]['allowedArguments']))) {
+            if ('verb' !== $key && !@in_array($key, explode(',', (string) $this->oaiConfiguration['verbs'][$verb]['allowedArguments']))) {
                 throw new OaiException(sprintf('Bad argument: %s: %s', $key, $val), 1_478_853_155);
             }
         }
@@ -274,10 +274,10 @@ class OaiService implements OaiServiceInterface
         $arrDates = ['from' => '00:00:00', 'until' => '23:59:59'];
         foreach ($arrDates as $key => $val) {
             if (isset($requestArguments[$key])) {
-                preg_match('/(\d{4})-(\d{2})-(\d{2})(([T]{1})(\d{2}):(\d{2}):(\d{2})([Z]{1}){1})?/', $requestArguments[$key], $regs);
+                preg_match('/(\d{4})-(\d{2})-(\d{2})(([T]{1})(\d{2}):(\d{2}):(\d{2})([Z]{1}){1})?/', (string) $requestArguments[$key], $regs);
                 if ('' !== $regs[1] && isset($regs[4]) && '' !== $regs[4]) {
                     $requestArguments['DB'.$key] = $regs[1].'-'.$regs[2].'-'.$regs[3].' '.$regs[6].':'.$regs[7].':'.$regs[8];
-                } elseif ('' !== $regs[1] && 10 === strlen($requestArguments[$key])) {
+                } elseif ('' !== $regs[1] && 10 === strlen((string) $requestArguments[$key])) {
                     $requestArguments['DB'.$key] = $regs[1].'-'.$regs[2].'-'.$regs[3].' '.$val;
                 } else {
                     throw new OaiException(sprintf('Bad argument. %s: %s', $key, $requestArguments[$key]), 1_478_853_737);
@@ -292,7 +292,7 @@ class OaiService implements OaiServiceInterface
     private function errorFromUntil(array &$requestArguments): void
     {
         if (isset($requestArguments['from'], $requestArguments['until'])) {
-            if (strlen($requestArguments['from']) !== strlen($requestArguments['until'])) {
+            if (strlen((string) $requestArguments['from']) !== strlen((string) $requestArguments['until'])) {
                 throw new OaiException(sprintf('Bad argument. from: %s until %s', $requestArguments['from'], $requestArguments['until']), 1_478_852_818);
             }
 
@@ -321,7 +321,7 @@ class OaiService implements OaiServiceInterface
      */
     private function errorRequiredArguments(string $verb, array $requestArguments): bool
     {
-        $requiredArguments = explode(',', $this->oaiConfiguration['verbs'][$verb]['requiredArguments']);
+        $requiredArguments = explode(',', (string) $this->oaiConfiguration['verbs'][$verb]['requiredArguments']);
         unset($requestArguments['verb']);
         foreach ($requiredArguments as $key => $requiredArgument) {
             if (isset($requestArguments[$requiredArgument])) {
@@ -486,7 +486,7 @@ class OaiService implements OaiServiceInterface
             $identifier = str_replace(
                 $this->oaiConfiguration['oai_identifier']['scheme'].$this->oaiConfiguration['oai_identifier']['delimiter'].$this->oaiConfiguration['oai_identifier']['repositoryIdentifier'].$this->oaiConfiguration['oai_identifier']['delimiter'],
                 '',
-                trim($arr['identifier'])
+                trim((string) $arr['identifier'])
             );
             $addWhere = ' (id:"'.$identifier.'")';
         } else {
@@ -508,7 +508,7 @@ class OaiService implements OaiServiceInterface
                 $addWhere .= ' (date_indexed:['.$from->format('Y-m-d\TH:i:s\Z').' TO '.$until->format('Y-m-d\TH:i:s\Z').'])';
             }
             if (isset($arr['set'])) {
-                $arrTmp = explode('_', trim($arr['set']));
+                $arrTmp = explode('_', trim((string) $arr['set']));
                 for ($i = 1, $iMax = count($arrTmp); $i < $iMax; $i += 2) {
                     $addWhere .= ' ('.$arrTmp[$i - 1].':'.$arrTmp[$i].')';
                 }
@@ -522,7 +522,7 @@ class OaiService implements OaiServiceInterface
             }
             $addWhere .= '';
         }
-        $mPrefix = $arr['metadataPrefix'] ? $arr['metadataPrefix'] : 'oai_dc';
+        $mPrefix = $arr['metadataPrefix'] ?: 'oai_dc';
 
         $res = $this->query($this->oaiConfiguration['query_parameters'][$mPrefix].$addWhere, $this->oaiConfiguration['date_indexed_field'], $direction, $arr);
         $arrResult['hits'] = $res->getFoundCount();
@@ -539,7 +539,7 @@ class OaiService implements OaiServiceInterface
             $arrResult['header'][$i]['datestamp'] = $document->getMetadata()['date_indexed'];
 
             foreach ($document->getClassification() as $setSpec) {
-                if ($setSpec && isset($this->oaiConfiguration['sets']['dc_'.strtolower($setSpec)])) {
+                if ($setSpec && isset($this->oaiConfiguration['sets']['dc_'.strtolower((string) $setSpec)])) {
                     $arrResult['header'][$i]['setSpec'][] = 'dc_'.$setSpec;
                 }
             }
@@ -573,12 +573,12 @@ class OaiService implements OaiServiceInterface
                         foreach ($this->oaiConfiguration['metadata_format_options']['oai_dc']['identifier'] as $key => $val) {
                             $metadata = $document->getMetadata();
                             if (isset($metadata[$key])) {
-                                $arrResult['metadata'][$i]['dc:identifier'][] = trim($val).' '.$metadata[$key];
+                                $arrResult['metadata'][$i]['dc:identifier'][] = trim((string) $val).' '.$metadata[$key];
                             }
                         }
                         foreach ($document->getAdditionalIdentifiers() as $key => $val) {
                             if ($val && isset($this->oaiConfiguration['metadata_format_options']['oai_dc']['identifier'][$key])) {
-                                $arrResult['metadata'][$i]['dc:identifier'][] = trim($this->oaiConfiguration['metadata_format_options']['oai_dc']['identifier'][$key]).' '.trim($val);
+                                $arrResult['metadata'][$i]['dc:identifier'][] = trim((string) $this->oaiConfiguration['metadata_format_options']['oai_dc']['identifier'][$key]).' '.trim((string) $val);
                             }
                         }
                         // Zeitschriftenband
@@ -684,7 +684,7 @@ class OaiService implements OaiServiceInterface
         if (is_array($requestArguments)) {
             foreach ($requestArguments as $key => $val) {
                 if ('from' === $key || 'until' === $key) {
-                    if (10 !== strlen($val)) {
+                    if (10 !== strlen((string) $val)) {
                         continue;
                     }
                     $test = date_parse($val);
@@ -768,7 +768,7 @@ class OaiService implements OaiServiceInterface
         $direction = $reverse ? 'desc' : 'asc';
         $query .= ' -doctype:fulltext';
         if (isset($configuration['set'])) {
-            if ('eu' == strtolower($configuration['set'])) {
+            if ('eu' === strtolower((string) $configuration['set'])) {
                 $query .= ' NOT(dc:(mathematica OR rusdml) AND year_publish:[1926 TO 9999])';
             } else {
                 $query .= ' dc:'.$configuration['set'];

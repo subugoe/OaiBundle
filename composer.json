@@ -22,12 +22,12 @@
         "league/flysystem": "^2.0 || ^3.0.10",
         "symfony/framework-bundle": "^6.0 || ^7.0",
         "ext-dom": "*",
-        "symfony/translation-contracts": "^3.0",
-        "jms/serializer": "^3.17 || ^4.0",
-        "subugoe/oai-model": "^0.1.2"
+        "symfony/translation-contracts": "*",
+        "jms/serializer": "*",
+        "subugoe/oai-model": "*"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.0",
+        "friendsofphp/php-cs-fixer": "*",
         "rector/rector": "*",
         "phpunit/phpunit": "*"
     },
