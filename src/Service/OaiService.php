@@ -27,7 +27,7 @@ class OaiService implements OaiServiceInterface
 {
     public ?\DOMDocument $oai = null;
 
-    private ?\Solarium\Client $client = null;
+    private ?Client $client = null;
 
     private ?\DOMElement $head = null;
 
@@ -37,13 +37,13 @@ class OaiService implements OaiServiceInterface
 
     private ?array $oaiConfiguration = null;
 
-    private ?\League\Flysystem\FilesystemOperator $oaiTempDirectory = null;
+    private ?FilesystemOperator $oaiTempDirectory = null;
 
     private ?\DOMElement $record = null;
 
     private ?\DOMElement $request = null;
 
-    private ?\Symfony\Component\HttpFoundation\RequestStack $requestStack = null;
+    private ?RequestStack $requestStack = null;
 
     /**
      * OaiService constructor.
